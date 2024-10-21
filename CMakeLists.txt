@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 project(lia)
 
 # Get all files in the source directory recursively
-file(GLOB_RECURSE SRC "src/*.cpp" "src/*.c")
+file(GLOB_RECURSE SRC "src/*.cpp" "lia/*.cpp")
 
 # Create an executable using those source file
 add_executable(${PROJECT_NAME} ${SRC})
