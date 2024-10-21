@@ -41,7 +41,6 @@ int main() {
     }
 
     const int TEST1 = sizeof(lia::Vec3);
-    const int TEST2 = sizeof(lia::Vec2);
 
     return 0;
 }
