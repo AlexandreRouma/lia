@@ -2,22 +2,46 @@
 #include <inttypes.h>
 #include <chrono>
 #include "../lia/lia.h"
+#include <stdlib.h>
 
-void testFunc(const lia::Mat& a, const lia::Mat& b) {
-    printf("A: %dx%d\n", a.lines(), a.columns());
-    printf("B: %dx%d\n", b.lines(), b.columns());
-}
+#define VEC_SIZE    4
+#define ITERATIONS  100000000
+
 
 int main() {
-    lia::Vec3 testVec;
-    lia::Mat3 testMat;
+    // Allocate the test vectors
+    printf("Allocating vectors\n");
+    lia::SVec<VEC_SIZE>* a = new lia::SVec<VEC_SIZE>[ITERATIONS];
+    lia::SVec<VEC_SIZE>* b = new lia::SVec<VEC_SIZE>[ITERATIONS];
+    double* results = new double[ITERATIONS];
 
-    lia::Vec3 test = testMat * testVec;
+    // Fill with random data
+    printf("Filling vectors\n");
+    for (int i = 0; i < ITERATIONS; i++) {
+        a[i](0) = (double)rand() / (double)RAND_MAX;
+        a[i](1) = (double)rand() / (double)RAND_MAX;
+        a[i](2) = (double)rand() / (double)RAND_MAX;
+        a[i](3) = (double)rand() / (double)RAND_MAX;
+        b[i](0) = (double)rand() / (double)RAND_MAX;
+        b[i](1) = (double)rand() / (double)RAND_MAX;
+        b[i](2) = (double)rand() / (double)RAND_MAX;
+        b[i](3) = (double)rand() / (double)RAND_MAX;
+    }
 
-    lia::Vec3 out;
-    lia::cross(out, testVec, test);
+    while (true) {
+        printf("Benchmarking\n");
+        auto begin = std::chrono::high_resolution_clock::now();
+        for (uint64_t i = 0; i < ITERATIONS; i++) {
+            results[i] = a[i] * b[i];
+        }
+        auto end = std::chrono::high_resolution_clock::now();
 
-    testFunc(testVec, testMat);
+        double seconds = (end - begin).count() / 1e9;
+        printf("Speed: %lf MDotProd/s\n", ((double)ITERATIONS / 1e6) / seconds);
+    }
+
+    const int TEST1 = sizeof(lia::Vec3);
+    const int TEST2 = sizeof(lia::Vec2);
 
     return 0;
 }
