@@ -41,9 +41,6 @@ namespace lia {
     using DMatd = DMat<double>;
     using DMatf = DMat<float>;
     using DMati = DMat<int>;
-    using DMatcd = DMat<std::complex<double>>;
-    using DMatcf = DMat<std::complex<float>>;
-    using DMatci = DMat<std::complex<int>>;
 
     template <typename T>
     void dot(DMat<T>& result, const DMat<T>& left, const DMat<T>& right);

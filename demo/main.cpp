@@ -40,5 +40,9 @@ int main() {
         printf("Speed: %lf MDotProd/s\n", ((double)ITERATIONS / 1e6) / seconds);
     }
 
+    lia::Vec2f test;
+
+    lia::Vec2f res = 4 * test;
+
     return 0;
 }
