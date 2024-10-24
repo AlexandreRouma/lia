@@ -20,6 +20,8 @@ namespace lia {
             for (int i = 0; i < ls*cs; i++) { data[i] = value; }
         }
 
+        // TODO: Initializer list
+
         // Function operator to access elements
         inline T& operator()(int line, int column = 0) { return data[line*cs + column]; }
         inline const T& operator()(int line, int column = 0) const { return data[line*cs + column]; }
