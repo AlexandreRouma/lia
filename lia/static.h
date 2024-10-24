@@ -387,8 +387,8 @@ namespace lia {
 
     // Multiplication operator for static square matrices of size 2 (scalar on the right)
     template <typename TV, typename TS>
-    inline SVec<2, TV> operator*(const SVec<2, TV>& left, const TS& right) {
-        SVec<2, TV> out;
+    inline SMat<2, 2, TV> operator*(const SMat<2, 2, TV>& left, const TS& right) {
+        SMat<2, 2, TV> out;
         const TV* a = left.data;
         TV* o = out.data;
         o[0] = a[0] * (TV)right; o[1] = a[1] * (TV)right;
@@ -398,8 +398,8 @@ namespace lia {
 
     // Multiplication operator for static square matrices of size 2 (scalar on the left)
     template <typename TV, typename TS>
-    inline SVec<2, TV> operator*(const TS& left, const SVec<2, TV>& right) {
-        SVec<2, TV> out;
+    inline SMat<2, 2, TV> operator*(const TS& left, const SMat<2, 2, TV>& right) {
+        SMat<2, 2, TV> out;
         const TV* b = right.data;
         TV* o = out.data;
         o[0] = b[0] * (TV)left; o[1] = b[1] * (TV)left;
@@ -407,7 +407,7 @@ namespace lia {
         return out;
     }
 
-    // Multiplication operator for static square matrices of size 2 (scalar on the right)
+    // Multiplication operator for static square matrices of size 3 (scalar on the right)
     template <typename TV, typename TS>
     inline SVec<3, TV> operator*(const SVec<3, TV>& left, const TS& right) {
         SVec<3, TV> out;
@@ -419,7 +419,7 @@ namespace lia {
         return out;
     }
 
-    // Multiplication operator for static square matrices of size 2 (scalar on the left)
+    // Multiplication operator for static square matrices of size 3 (scalar on the left)
     template <typename TV, typename TS>
     inline SVec<3, TV> operator*(const TS& left, const SVec<3, TV>& right) {
         SVec<3, TV> out;
@@ -428,6 +428,32 @@ namespace lia {
         o[0] = b[0] * (TV)left; o[1] = b[1] * (TV)left; o[2] = b[2] * (TV)left;
         o[3] = b[3] * (TV)left; o[4] = b[4] * (TV)left; o[5] = b[5] * (TV)left;
         o[6] = b[6] * (TV)left; o[7] = b[7] * (TV)left; o[8] = b[8] * (TV)left;
+        return out;
+    }
+
+    // Multiplication operator for static square matrices of size 4 (scalar on the right)
+    template <typename TV, typename TS>
+    inline SVec<4, TV> operator*(const SVec<4, TV>& left, const TS& right) {
+        SVec<4, TV> out;
+        const TV* a = left.data;
+        TV* o = out.data;
+        o[0] = a[0] * (TV)right; o[1] = a[1] * (TV)right; o[2] = a[2] * (TV)right; o[3] = a[3] * (TV)right;
+        o[4] = a[4] * (TV)right; o[5] = a[5] * (TV)right; o[6] = a[6] * (TV)right; o[7] = a[7] * (TV)right;
+        o[8] = a[8] * (TV)right; o[9] = a[9] * (TV)right; o[10] = a[10] * (TV)right; o[11] = a[11] * (TV)right;
+        o[12] = a[12] * (TV)right; o[13] = a[13] * (TV)right; o[14] = a[14] * (TV)right; o[15] = a[15] * (TV)right;
+        return out;
+    }
+
+    // Multiplication operator for static square matrices of size 4 (scalar on the left)
+    template <typename TV, typename TS>
+    inline SVec<4, TV> operator*(const TS& left, const SVec<4, TV>& right) {
+        SVec<4, TV> out;
+        const TV* b = right.data;
+        TV* o = out.data;
+        o[0] = b[0] * (TV)left; o[1] = b[1] * (TV)left; o[2] = b[2] * (TV)left; o[3] = b[3] * (TV)left;
+        o[4] = b[4] * (TV)left; o[5] = b[5] * (TV)left; o[6] = b[6] * (TV)left; o[7] = b[7] * (TV)left;
+        o[8] = b[8] * (TV)left; o[9] = b[9] * (TV)left; o[10] = b[10] * (TV)left; o[11] = b[11] * (TV)left;
+        o[12] = b[12] * (TV)left; o[13] = b[13] * (TV)left; o[14] = b[14] * (TV)left; o[15] = b[15] * (TV)left;
         return out;
     }
 
@@ -510,6 +536,24 @@ namespace lia {
         return out;
     }
 
+    // Dot product between square static matrices and vector of any size
+    template <int d, typename T>
+    inline SVec<d, T> operator*(const SMat<d, d, T>& left, const SVec<d, T>& right) {
+        SVec<d, T> out;
+        const T* da = left.data;
+        const T* db = right.data;
+        T* o = out.data;
+        for (int i = 0; i < a; i++) {
+            const T* line = &da[i*b];
+            T* const sum = &o[i];
+            *sum = 0;
+            for (int j = 0; j < c; j++) {
+                *sum += line[j]*db[j];
+            }
+        }
+        return out;
+    }
+
     // Dot product between static matrices of any size
     template <int a, int b, int c, typename T>
     inline SMat<a, c, T> operator*(const SMat<a, b, T>& left, const SMat<b, c, T>& right) {
@@ -533,6 +577,18 @@ namespace lia {
     }
 
     // ============================= CROSS PRODUCT =============================
+
+    template <typename T>
+    inline SVec<3, T> operator^(const SVec<3, T>& left, const SVec<3, T>& right) {
+        SVec<3, T> out;
+        const T* a = left.data;
+        const T* b = right.data;
+        T* o = out.data;
+        o[0] = a[1]*b[2] - a[2]*b[1];
+        o[1] = a[2]*b[0] - a[0]*b[2];
+        o[2] = a[0]*b[1] - a[1]*b[0];
+        return out;
+    }
 
     // ============================= FUNCTION API =============================
 
