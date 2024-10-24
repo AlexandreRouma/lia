@@ -1,18 +1,18 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <chrono>
-#include "../lia/lia.h"
+#include "../lia/static.h"
 #include <stdlib.h>
+#include <complex>
 
 #define VEC_SIZE    4
 #define ITERATIONS  100000000
 
-
 int main() {
     // Allocate the test vectors
     printf("Allocating vectors\n");
-    lia::SVec<VEC_SIZE>* a = new lia::SVec<VEC_SIZE>[ITERATIONS];
-    lia::SVec<VEC_SIZE>* b = new lia::SVec<VEC_SIZE>[ITERATIONS];
+    lia::SVecd<VEC_SIZE>* a = new lia::SVecd<VEC_SIZE>[ITERATIONS];
+    lia::SVecd<VEC_SIZE>* b = new lia::SVecd<VEC_SIZE>[ITERATIONS];
     double* results = new double[ITERATIONS];
 
     // Fill with random data
@@ -39,8 +39,6 @@ int main() {
         double seconds = (end - begin).count() / 1e9;
         printf("Speed: %lf MDotProd/s\n", ((double)ITERATIONS / 1e6) / seconds);
     }
-
-    const int TEST1 = sizeof(lia::Vec3);
 
     return 0;
 }

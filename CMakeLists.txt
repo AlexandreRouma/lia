@@ -8,7 +8,7 @@ file(GLOB_RECURSE SRC "demo/*.cpp" "lia/*.cpp")
 add_executable(${PROJECT_NAME} ${SRC})
 
 # Specify that the C++ version to use for the executable is C++17
-target_compile_options(${PROJECT_NAME} PRIVATE -std=c++17 -Og)
+target_compile_options(${PROJECT_NAME} PRIVATE /std:c++17)
 # /O2 /Ob2
 
 #find_package(libusb CONFIG REQUIRED)
