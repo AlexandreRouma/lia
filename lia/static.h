@@ -1,5 +1,6 @@
 #pragma once
 #include <initializer_list>
+#include "force_inline.h"
 
 namespace lia {
     /**
@@ -9,13 +10,13 @@ namespace lia {
     class SMat {
     public:
         // Default constructor
-        inline constexpr SMat() {}
+        constexpr LIA_FORCE_INLINE SMat() {}
 
         /**
          * Create a matrix or vector and set all its elements to a value.
          * @param value Value to set all the elements to.
         */
-        inline constexpr SMat(T value) {
+        constexpr LIA_FORCE_INLINE SMat(T value) {
             // Set all element to the same value
             for (int i = 0; i < ls*cs; i++) { data[i] = value; }
         }
@@ -24,7 +25,7 @@ namespace lia {
          * Create a matrix or vector and set its elemements
          * @param value Value to set all the elements to.
         */
-        inline constexpr SMat(T v1, T v2) {
+        constexpr LIA_FORCE_INLINE SMat(T v1, T v2) {
             static_assert(ls == 2 && cs == 1, "The size of the matrix/vector is not 2x1");
             data[0] = v1;
             data[1] = v2;
@@ -34,7 +35,7 @@ namespace lia {
          * Create a matrix or vector and set its elemements
          * @param value Value to set all the elements to.
         */
-        inline constexpr SMat(T v1, T v2, T v3) {
+        constexpr LIA_FORCE_INLINE SMat(T v1, T v2, T v3) {
             static_assert(ls == 3 && cs == 1, "The size of the matrix/vector is not 3x1");
             data[0] = v1;
             data[1] = v2;
@@ -45,7 +46,7 @@ namespace lia {
          * Create a matrix or vector and set its elemements
          * @param value Value to set all the elements to.
         */
-        inline constexpr SMat(T v1, T v2, T v3, T v4) {
+        constexpr LIA_FORCE_INLINE SMat(T v1, T v2, T v3, T v4) {
             static_assert(ls == 4 && cs == 1, "The size of the matrix/vector is not 4x1");
             data[0] = v1;
             data[1] = v2;
@@ -57,41 +58,41 @@ namespace lia {
          * Create a matrix or vector and set its elements.
          * @param values Values for each of its elements.
         */
-        inline constexpr SMat(std::initializer_list<T> values) {
+        constexpr LIA_FORCE_INLINE SMat(std::initializer_list<T> values) {
             // Set all element to their given value
             for (int i = 0; i < ls*cs; i++) { data[i] = values[i]; }
         }
 
         // Function operator to access elements
-        inline constexpr T& operator()(int line, int column = 0) { return data[line*cs + column]; }
-        inline constexpr const T& operator()(int line, int column = 0) const { return data[line*cs + column]; }
+        constexpr LIA_FORCE_INLINE T& operator()(int line, int column = 0) { return data[line*cs + column]; }
+        constexpr LIA_FORCE_INLINE const T& operator()(int line, int column = 0) const { return data[line*cs + column]; }
 
         // Array operator to access the data
-        inline constexpr T& operator[](int id) { return data[id]; }
-        inline constexpr const T& operator[](int id) const { return data[id]; }
+        constexpr LIA_FORCE_INLINE T& operator[](int id) { return data[id]; }
+        constexpr LIA_FORCE_INLINE const T& operator[](int id) const { return data[id]; }
 
         // In-place addition operator
-        inline constexpr void operator+=(const SMat<ls, cs, T>& right) {
+        constexpr LIA_FORCE_INLINE void operator+=(const SMat<ls, cs, T>& right) {
             add(*this, *this, right);
         }
 
         // In-place subtraction operator
-        inline constexpr void operator-=(const SMat<ls, cs, T>& right) {
+        constexpr LIA_FORCE_INLINE void operator-=(const SMat<ls, cs, T>& right) {
             sub(*this, *this, right);
         }
 
         // In-place scalar multiplication operator
-        inline constexpr void operator*=(const T& right) {
+        constexpr LIA_FORCE_INLINE void operator*=(const T& right) {
             mul(*this, *this, right);
         }
 
         // In-place scalar division operator
-        inline constexpr void operator/=(const T& right) {
+        constexpr LIA_FORCE_INLINE void operator/=(const T& right) {
             div(*this, *this, right);
         }
 
         // In-place cross product operator
-        inline constexpr void operator^=(const SMat<ls, cs, T>& right) {
+        constexpr LIA_FORCE_INLINE void operator^=(const SMat<ls, cs, T>& right) {
             static_assert(ls == 3 && cs == 1, "The cross product operator can only be used on 3 element column vectors");
             cross(*this, *this, right);
         }
@@ -150,7 +151,7 @@ namespace lia {
     */
 
     template <typename T>
-    static inline constexpr void add(SVec<2, T>& result, const SVec<2, T>& left, const SVec<2, T>& right) {
+    static constexpr LIA_FORCE_INLINE void add(SVec<2, T>& result, const SVec<2, T>& left, const SVec<2, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -159,7 +160,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void add(SVec<3, T>& result, const SVec<3, T>& left, const SVec<3, T>& right) {
+    static constexpr LIA_FORCE_INLINE void add(SVec<3, T>& result, const SVec<3, T>& left, const SVec<3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -169,7 +170,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void add(SVec<4, T>& result, const SVec<4, T>& left, const SVec<4, T>& right) {
+    static constexpr LIA_FORCE_INLINE void add(SVec<4, T>& result, const SVec<4, T>& left, const SVec<4, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -180,7 +181,7 @@ namespace lia {
     }
 
     template <int d, typename T>
-    static inline constexpr void add(SVec<d, T>& result, const SVec<d, T>& left, const SVec<d, T>& right) {
+    static constexpr LIA_FORCE_INLINE void add(SVec<d, T>& result, const SVec<d, T>& left, const SVec<d, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -190,7 +191,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void add(SMat<2, 2, T>& result, const SMat<2, 2, T>& left, const SMat<2, 2, T>& right) {
+    static constexpr LIA_FORCE_INLINE void add(SMat<2, 2, T>& result, const SMat<2, 2, T>& left, const SMat<2, 2, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -199,7 +200,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void add(SMat<3, 3, T>& result, const SMat<3, 3, T>& left, const SMat<3, 3, T>& right) {
+    static constexpr LIA_FORCE_INLINE void add(SMat<3, 3, T>& result, const SMat<3, 3, T>& left, const SMat<3, 3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -209,7 +210,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void add(SMat<4, 4, T>& result, const SMat<4, 4, T>& left, const SMat<4, 4, T>& right) {
+    static constexpr LIA_FORCE_INLINE void add(SMat<4, 4, T>& result, const SMat<4, 4, T>& left, const SMat<4, 4, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -220,7 +221,7 @@ namespace lia {
     }
 
     template <int ls, int cs, typename T>
-    static inline constexpr void add(SMat<cs, ls, T>& result, const SMat<cs, ls, T>& left, const SMat<cs, ls, T>& right) {
+    static constexpr LIA_FORCE_INLINE void add(SMat<cs, ls, T>& result, const SMat<cs, ls, T>& left, const SMat<cs, ls, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -231,7 +232,7 @@ namespace lia {
 
     // Addition operator for static matrices and vectors
     template <int ls, int cs, typename T>
-    inline SMat<ls, cs, T> operator+(const SMat<ls, cs, T>& left, const SMat<ls, cs, T>& right) {
+    static constexpr LIA_FORCE_INLINE SMat<ls, cs, T> operator+(const SMat<ls, cs, T>& left, const SMat<ls, cs, T>& right) {
         SMat<ls, cs, T> result;
         add(result, left, right);
         return result;
@@ -247,7 +248,7 @@ namespace lia {
     */
 
     template <typename T>
-    static inline constexpr void sub(SVec<2, T>& result, const SVec<2, T>& left, const SVec<2, T>& right) {
+    static constexpr LIA_FORCE_INLINE void sub(SVec<2, T>& result, const SVec<2, T>& left, const SVec<2, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -256,7 +257,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void sub(SVec<3, T>& result, const SVec<3, T>& left, const SVec<3, T>& right) {
+    static constexpr LIA_FORCE_INLINE void sub(SVec<3, T>& result, const SVec<3, T>& left, const SVec<3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -266,7 +267,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void sub(SVec<4, T>& result, const SVec<4, T>& left, const SVec<4, T>& right) {
+    static constexpr LIA_FORCE_INLINE void sub(SVec<4, T>& result, const SVec<4, T>& left, const SVec<4, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -277,7 +278,7 @@ namespace lia {
     }
 
     template <int d, typename T>
-    static inline constexpr void sub(SVec<d, T>& result, const SVec<d, T>& left, const SVec<d, T>& right) {
+    static constexpr LIA_FORCE_INLINE void sub(SVec<d, T>& result, const SVec<d, T>& left, const SVec<d, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -287,7 +288,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void sub(SMat<2, 2, T>& result, const SMat<2, 2, T>& left, const SMat<2, 2, T>& right) {
+    static constexpr LIA_FORCE_INLINE void sub(SMat<2, 2, T>& result, const SMat<2, 2, T>& left, const SMat<2, 2, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -296,7 +297,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void sub(SMat<3, 3, T>& result, const SMat<3, 3, T>& left, const SMat<3, 3, T>& right) {
+    static constexpr LIA_FORCE_INLINE void sub(SMat<3, 3, T>& result, const SMat<3, 3, T>& left, const SMat<3, 3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -306,7 +307,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void sub(SMat<4, 4, T>& result, const SMat<4, 4, T>& left, const SMat<4, 4, T>& right) {
+    static constexpr LIA_FORCE_INLINE void sub(SMat<4, 4, T>& result, const SMat<4, 4, T>& left, const SMat<4, 4, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -317,7 +318,7 @@ namespace lia {
     }
 
     template <int ls, int cs, typename T>
-    static inline constexpr void sub(SMat<cs, ls, T>& result, const SMat<cs, ls, T>& left, const SMat<cs, ls, T>& right) {
+    static constexpr LIA_FORCE_INLINE void sub(SMat<cs, ls, T>& result, const SMat<cs, ls, T>& left, const SMat<cs, ls, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -328,7 +329,7 @@ namespace lia {
 
     // Addition operator for static matrices and vectors
     template <int ls, int cs, typename T>
-    inline SMat<ls, cs, T> operator-(const SMat<ls, cs, T>& left, const SMat<ls, cs, T>& right) {
+    static constexpr LIA_FORCE_INLINE SMat<ls, cs, T> operator-(const SMat<ls, cs, T>& left, const SMat<ls, cs, T>& right) {
         SMat<ls, cs, T> result;
         sub(result, left, right);
         return result;
@@ -344,7 +345,7 @@ namespace lia {
     */
 
     template <typename T>
-    static inline constexpr void mul(SVec<2, T>& result, const SVec<2, T>& value, const T& scalar) {
+    static constexpr LIA_FORCE_INLINE void mul(SVec<2, T>& result, const SVec<2, T>& value, const T& scalar) {
         const T* v = value.data;
         T* r = result.data;
         r[0] = v[0] * scalar;
@@ -352,7 +353,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void mul(SVec<3, T>& result, const SVec<3, T>& value, const T& scalar) {
+    static constexpr LIA_FORCE_INLINE void mul(SVec<3, T>& result, const SVec<3, T>& value, const T& scalar) {
         const T* v = value.data;
         T* r = result.data;
         r[0] = v[0] * scalar;
@@ -361,7 +362,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void mul(SVec<4, T>& result, const SVec<4, T>& value, const T& scalar) {
+    static constexpr LIA_FORCE_INLINE void mul(SVec<4, T>& result, const SVec<4, T>& value, const T& scalar) {
         const T* v = value.data;
         T* r = result.data;
         r[0] = v[0] * scalar;
@@ -371,7 +372,7 @@ namespace lia {
     }
 
     template <int d, typename T>
-    static inline constexpr void mul(SVec<d, T>& result, const SVec<d, T>& value, const T& scalar) {
+    static constexpr LIA_FORCE_INLINE void mul(SVec<d, T>& result, const SVec<d, T>& value, const T& scalar) {
         const T* v = value.data;
         T* r = result.data;
         for (int i = 0; i < d; i++) {
@@ -380,7 +381,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void mul(SMat<2, 2, T>& result, const SMat<2, 2, T>& value, const T& scalar) {
+    static constexpr LIA_FORCE_INLINE void mul(SMat<2, 2, T>& result, const SMat<2, 2, T>& value, const T& scalar) {
         const T* m = value.data;
         T* r = result.data;
         r[0] = m[0] * scalar; r[1] = m[1] * scalar;
@@ -388,7 +389,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void mul(SMat<3, 3, T>& result, const SMat<3, 3, T>& value, const T& scalar) {
+    static constexpr LIA_FORCE_INLINE void mul(SMat<3, 3, T>& result, const SMat<3, 3, T>& value, const T& scalar) {
         const T* m = value.data;
         T* r = result.data;
         r[0] = m[0] * scalar; r[1] = m[1] * scalar; r[2] = m[2] * scalar;
@@ -397,7 +398,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void mul(SMat<4, 4, T>& result, const SMat<4, 4, T>& value, const T& scalar) {
+    static constexpr LIA_FORCE_INLINE void mul(SMat<4, 4, T>& result, const SMat<4, 4, T>& value, const T& scalar) {
         const T* m = value.data;
         T* r = result.data;
         r[0] = m[0] * scalar; r[1] = m[1] * scalar; r[2] = m[2] * scalar; r[3] = m[3] * scalar;
@@ -407,7 +408,7 @@ namespace lia {
     }
 
     template <int ls, int cs, typename T>
-    static inline constexpr void mul(SMat<ls, cs, T>& result, const SMat<ls, cs, T>& value, const T& scalar) {
+    static constexpr LIA_FORCE_INLINE void mul(SMat<ls, cs, T>& result, const SMat<ls, cs, T>& value, const T& scalar) {
         const T* m = value.data;
         T* r = result.data;
         for (int i = 0; i < ls*cs; i++) {
@@ -417,7 +418,7 @@ namespace lia {
 
     // Scalar multiplication operator (scalar on the right)
     template <int ls, int cs, typename T>
-    static inline constexpr SMat<ls, cs, T> operator*(const SMat<ls, cs, T>& left, const T& right) {
+    static constexpr LIA_FORCE_INLINE SMat<ls, cs, T> operator*(const SMat<ls, cs, T>& left, const T& right) {
         SMat<ls, cs, T> result;
         mul(result, left, right);
         return result;
@@ -425,7 +426,7 @@ namespace lia {
 
     // Scalar multiplication operator (scalar on the left)
     template <int ls, int cs, typename T>
-    static inline constexpr SMat<ls, cs, T> operator*(const T& left, const SMat<ls, cs, T>& right) {
+    static constexpr LIA_FORCE_INLINE SMat<ls, cs, T> operator*(const T& left, const SMat<ls, cs, T>& right) {
         SMat<ls, cs, T> result;
         mul(result, right, left);
         return result;
@@ -441,7 +442,7 @@ namespace lia {
     */
 
     template <typename T>
-    static inline constexpr void div(SVec<2, T>& result, const SVec<2, T>& left, const T& right) {
+    static constexpr LIA_FORCE_INLINE void div(SVec<2, T>& result, const SVec<2, T>& left, const T& right) {
         const T* a = left.data;
         T* r = result.data;
         r[0] = a[0] / (T)right;
@@ -449,7 +450,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void div(SVec<3, T>& result, const SVec<3, T>& left, const T& right) {
+    static constexpr LIA_FORCE_INLINE void div(SVec<3, T>& result, const SVec<3, T>& left, const T& right) {
         const T* a = left.data;
         T* r = result.data;
         r[0] = a[0] / (T)right;
@@ -458,7 +459,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void div(SVec<4, T>& result, const SVec<4, T>& left, const T& right) {
+    static constexpr LIA_FORCE_INLINE void div(SVec<4, T>& result, const SVec<4, T>& left, const T& right) {
         const T* a = left.data;
         T* r = result.data;
         r[0] = a[0] / (T)right;
@@ -468,7 +469,7 @@ namespace lia {
     }
 
     template <int d, typename T>
-    static inline constexpr void div(SVec<d, T>& result, const SVec<d, T>& left, const T& right) {
+    static constexpr LIA_FORCE_INLINE void div(SVec<d, T>& result, const SVec<d, T>& left, const T& right) {
         const T* a = left.data;
         T* r = result.data;
         for (int i = 0; i < d; i++) {
@@ -477,7 +478,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void div(SMat<2, 2, T>& result, const SMat<2, 2, T>& left, const T& right) {
+    static constexpr LIA_FORCE_INLINE void div(SMat<2, 2, T>& result, const SMat<2, 2, T>& left, const T& right) {
         const T* a = left.data;
         T* r = result.data;
         r[0] = a[0] / (T)right; r[1] = a[1] / (T)right;
@@ -485,7 +486,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void div(SMat<3, 3, T>& result, const SMat<3, 3, T>& left, const T& right) {
+    static constexpr LIA_FORCE_INLINE void div(SMat<3, 3, T>& result, const SMat<3, 3, T>& left, const T& right) {
         const T* a = left.data;
         T* r = result.data;
         r[0] = a[0] / (T)right; r[1] = a[1] / (T)right; r[2] = a[2] / (T)right;
@@ -494,7 +495,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void div(SMat<4, 4, T>& result, const SMat<4, 4, T>& left, const T& right) {
+    static constexpr LIA_FORCE_INLINE void div(SMat<4, 4, T>& result, const SMat<4, 4, T>& left, const T& right) {
         const T* a = left.data;
         T* r = result.data;
         r[0] = a[0] / (T)right; r[1] = a[1] / (T)right; r[2] = a[2] / (T)right; r[3] = a[3] / (T)right;
@@ -504,7 +505,7 @@ namespace lia {
     }
 
     template <int ls, int cs, typename T>
-    static inline constexpr void div(SMat<ls, cs, T>& result, const SMat<ls, cs, T>& left, const T& right) {
+    static constexpr LIA_FORCE_INLINE void div(SMat<ls, cs, T>& result, const SMat<ls, cs, T>& left, const T& right) {
         const T* a = left.data;
         T* r = result.data;
         for (int i = 0; i < ls*cs; i++) {
@@ -514,7 +515,7 @@ namespace lia {
 
     // Scalar division operator
     template <int ls, int cs, typename T>
-    static inline constexpr SMat<ls, cs, T> operator/(const SMat<ls, cs, T>& left, const T& right) {
+    static constexpr LIA_FORCE_INLINE SMat<ls, cs, T> operator/(const SMat<ls, cs, T>& left, const T& right) {
         SMat<ls, cs, T> result;
         div(result, left, right);
         return result;
@@ -530,28 +531,28 @@ namespace lia {
     */
 
     template <typename T>
-    static inline constexpr void dot(double& result, const SVec<2, T>& left, const SVec<2, T>& right) {
+    static constexpr LIA_FORCE_INLINE void dot(double& result, const SVec<2, T>& left, const SVec<2, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         result = a[0]*b[0] + a[1]*b[1];
     }
 
     template <typename T>
-    static inline constexpr void dot(double& result, const SVec<3, T>& left, const SVec<3, T>& right) {
+    static constexpr LIA_FORCE_INLINE void dot(double& result, const SVec<3, T>& left, const SVec<3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         result = a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
     }
 
     template <typename T>
-    static inline constexpr void dot(double& result, const SVec<4, T>& left, const SVec<4, T>& right) {
+    static constexpr LIA_FORCE_INLINE void dot(double& result, const SVec<4, T>& left, const SVec<4, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         result = a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
     }
 
     template <int d, typename T>
-    static inline constexpr void dot(double& result, const SVec<d, T>& left, const SVec<d, T>& right) {
+    static constexpr LIA_FORCE_INLINE void dot(double& result, const SVec<d, T>& left, const SVec<d, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         result = 0.0;
@@ -561,7 +562,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void dot(SVec<2, T>& result, const SMat<2, 2, T>& left, const SVec<2, T>& right) {
+    static constexpr LIA_FORCE_INLINE void dot(SVec<2, T>& result, const SMat<2, 2, T>& left, const SVec<2, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -570,7 +571,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void dot(SVec<3, T>& result, const SMat<3, 3, T>& left, const SVec<3, T>& right) {
+    static constexpr LIA_FORCE_INLINE void dot(SVec<3, T>& result, const SMat<3, 3, T>& left, const SVec<3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -580,7 +581,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void dot(SVec<4, T>& result, const SMat<4, 4, T>& left, const SVec<4, T>& right) {
+    static constexpr LIA_FORCE_INLINE void dot(SVec<4, T>& result, const SMat<4, 4, T>& left, const SVec<4, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -591,7 +592,7 @@ namespace lia {
     }
 
     template <int d, typename T>
-    static inline constexpr void dot(SVec<d, T>& result, const SMat<d, d, T>& left, const SVec<d, T>& right) {
+    static constexpr LIA_FORCE_INLINE void dot(SVec<d, T>& result, const SMat<d, d, T>& left, const SVec<d, T>& right) {
         const T* da = left.data;
         const T* db = right.data;
         T* r = result.data;
@@ -606,7 +607,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr void dot(SMat<2, 2, T>& result, const SMat<2, 2, T>& left, const SMat<2, 2, T>& right) {
+    static constexpr LIA_FORCE_INLINE void dot(SMat<2, 2, T>& result, const SMat<2, 2, T>& left, const SMat<2, 2, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -615,7 +616,7 @@ namespace lia {
     }
 
     template <int a, int b, int c, typename T>
-    static inline constexpr void dot(SMat<a, c, T>& result, const SMat<a, b, T>& left, const SMat<b, c, T>& right) {
+    static constexpr LIA_FORCE_INLINE void dot(SMat<a, c, T>& result, const SMat<a, b, T>& left, const SMat<b, c, T>& right) {
         const T* da = left.data;
         const T* db = right.data;
         T* r = result.data;
@@ -635,7 +636,7 @@ namespace lia {
 
     // Vector dot product operator
     template <int d, typename T>
-    static inline constexpr T operator*(const SVec<d, T>& left, const SVec<d, T>& right) {
+    static constexpr LIA_FORCE_INLINE T operator*(const SVec<d, T>& left, const SVec<d, T>& right) {
         T result;
         dot(result, left, right);
         return result;
@@ -643,7 +644,7 @@ namespace lia {
 
     // Matrix dot product operator
     template <int a, int b, int c, typename T>
-    static inline constexpr SMat<a, c, T> operator*(const SMat<a, b, T>& left, const SMat<b, c, T>& right) {
+    static constexpr LIA_FORCE_INLINE SMat<a, c, T> operator*(const SMat<a, b, T>& left, const SMat<b, c, T>& right) {
         SMat<a, c, T> result;
         dot(result, left, right);
         return result;
@@ -658,7 +659,7 @@ namespace lia {
      * @param right Right-hand side vector.
     */
     template <typename T>
-    static inline constexpr void cross(SVec<3, T>& result, const SVec<3, T>& left, const SVec<3, T>& right) {
+    static constexpr LIA_FORCE_INLINE void cross(SVec<3, T>& result, const SVec<3, T>& left, const SVec<3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
         T* r = result.data;
@@ -668,7 +669,7 @@ namespace lia {
     }
 
     template <typename T>
-    static inline constexpr SVec<3, T> operator^(const SVec<3, T>& left, const SVec<3, T>& right) {
+    static constexpr LIA_FORCE_INLINE SVec<3, T> operator^(const SVec<3, T>& left, const SVec<3, T>& right) {
         SVec<3, T> result;
         cross(result, left, right);
         return result;
