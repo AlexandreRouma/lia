@@ -115,7 +115,7 @@ int main() {
         printf("All tests passed successfully!\n");
         return 0;
     }
-    catch (const std::runtime_error& e) {
+    catch ([[maybe_unused]] const std::runtime_error& e) {
         return -1;
     }
 

@@ -82,13 +82,15 @@ namespace lia {
         }
 
         // In-place scalar multiplication operator
-        constexpr LIA_FORCE_INLINE void operator*=(const T& right) {
-            mul(*this, *this, right);
+        template <typename TS>
+        constexpr LIA_FORCE_INLINE void operator*=(const TS& right) {
+            mul(*this, *this, (T)right);
         }
 
         // In-place scalar division operator
-        constexpr LIA_FORCE_INLINE void operator/=(const T& right) {
-            div(*this, *this, right);
+        template <typename TS>
+        constexpr LIA_FORCE_INLINE void operator/=(const TS& right) {
+            div(*this, *this, (T)right);
         }
 
         // In-place cross product operator
@@ -613,6 +615,27 @@ namespace lia {
         T* r = result.data;
         r[0] = a[0]*b[0] + a[1]*b[2]; r[1] = a[0]*b[1] + a[1]*b[3];
         r[2] = a[2]*b[0] + a[3]*b[2]; r[3] = a[2]*b[1] + a[3]*b[3];
+    }
+
+    template <typename T>
+    static constexpr LIA_FORCE_INLINE void dot(SMat<3, 3, T>& result, const SMat<3, 3, T>& left, const SMat<3, 3, T>& right) {
+        const T* a = left.data;
+        const T* b = right.data;
+        T* r = result.data;
+        r[0] = a[0]*b[0] + a[1]*b[3] + a[2]*b[6]; r[1] = a[0]*b[1] + a[1]*b[4] + a[2]*b[7]; r[2] = a[0]*b[2] + a[1]*b[5] + a[2]*b[8];
+        r[3] = a[3]*b[0] + a[4]*b[3] + a[5]*b[6]; r[4] = a[3]*b[1] + a[4]*b[4] + a[5]*b[7]; r[5] = a[3]*b[2] + a[4]*b[5] + a[5]*b[8];
+        r[6] = a[6]*b[0] + a[7]*b[3] + a[8]*b[6]; r[7] = a[6]*b[1] + a[7]*b[4] + a[8]*b[7]; r[8] = a[6]*b[2] + a[7]*b[5] + a[8]*b[8];
+    }
+
+    template <typename T>
+    static constexpr LIA_FORCE_INLINE void dot(SMat<4, 4, T>& result, const SMat<4, 4, T>& left, const SMat<4, 4, T>& right) {
+        const T* a = left.data;
+        const T* b = right.data;
+        T* r = result.data;
+        r[0] = a[0]*b[0] + a[1]*b[4] + a[2]*b[8] + a[3]*b[12]; r[1] = a[0]*b[1] + a[1]*b[5] + a[2]*b[9] + a[3]*b[13]; r[2] = a[0]*b[2] + a[1]*b[6] + a[2]*b[10] + a[3]*b[14]; r[3] = a[0]*b[3] + a[1]*b[7] + a[2]*b[11] + a[3]*b[15]; 
+        r[4] = a[4]*b[0] + a[5]*b[4] + a[6]*b[8] + a[7]*b[12]; r[5] = a[4]*b[1] + a[5]*b[5] + a[6]*b[9] + a[7]*b[13]; r[6] = a[4]*b[2] + a[5]*b[6] + a[6]*b[10] + a[7]*b[14]; r[7] = a[4]*b[3] + a[5]*b[7] + a[6]*b[11] + a[7]*b[15]; 
+        r[8] = a[8]*b[0] + a[9]*b[4] + a[10]*b[8] + a[11]*b[12]; r[9] = a[8]*b[1] + a[9]*b[5] + a[10]*b[9] + a[11]*b[13]; r[10] = a[8]*b[2] + a[9]*b[6] + a[10]*b[10] + a[11]*b[14]; r[11] = a[8]*b[3] + a[9]*b[7] + a[10]*b[11] + a[11]*b[15];
+        r[12] = a[12]*b[0] + a[13]*b[4] + a[14]*b[8] + a[15]*b[12]; r[13] = a[12]*b[1] + a[13]*b[5] + a[14]*b[9] + a[15]*b[13]; r[14] = a[12]*b[2] + a[13]*b[6] + a[14]*b[10] + a[15]*b[14]; r[15] = a[12]*b[3] + a[13]*b[7] + a[14]*b[11] + a[15]*b[15];
     }
 
     template <int a, int b, int c, typename T>
