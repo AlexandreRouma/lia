@@ -714,4 +714,5 @@ namespace lia {
     // ============================= FUNCTION API =============================
 
     // TODO: Maybe, maybe not
+    // NOTE: To do it, move the code of the operators to inline functions
 }
