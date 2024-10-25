@@ -1,5 +1,5 @@
 #pragma once
-#include <complex>
+#include <initializer_list>
 
 namespace lia {
     /**
@@ -9,26 +9,92 @@ namespace lia {
     class SMat {
     public:
         // Default constructor
-        inline SMat() {}
+        inline constexpr SMat() {}
 
         /**
-         * Create a matrix and set all its elements to a value.
+         * Create a matrix or vector and set all its elements to a value.
          * @param value Value to set all the elements to.
         */
-        inline SMat(T value) {
+        inline constexpr SMat(T value) {
             // Set all element to the same value
             for (int i = 0; i < ls*cs; i++) { data[i] = value; }
         }
 
-        // TODO: Initializer list
+        /**
+         * Create a matrix or vector and set its elemements
+         * @param value Value to set all the elements to.
+        */
+        inline constexpr SMat(T v1, T v2) {
+            static_assert(ls == 2 && cs == 1, "The size of the matrix/vector is not 2x1");
+            data[0] = v1;
+            data[1] = v2;
+        }
+
+        /**
+         * Create a matrix or vector and set its elemements
+         * @param value Value to set all the elements to.
+        */
+        inline constexpr SMat(T v1, T v2, T v3) {
+            static_assert(ls == 3 && cs == 1, "The size of the matrix/vector is not 3x1");
+            data[0] = v1;
+            data[1] = v2;
+            data[2] = v3;
+        }
+
+        /**
+         * Create a matrix or vector and set its elemements
+         * @param value Value to set all the elements to.
+        */
+        inline constexpr SMat(T v1, T v2, T v3, T v4) {
+            static_assert(ls == 4 && cs == 1, "The size of the matrix/vector is not 4x1");
+            data[0] = v1;
+            data[1] = v2;
+            data[2] = v3;
+            data[3] = v4;
+        }
+
+        /**
+         * Create a matrix or vector and set its elements.
+         * @param values Values for each of its elements.
+        */
+        inline constexpr SMat(std::initializer_list<T> values) {
+            // Set all element to their given value
+            for (int i = 0; i < ls*cs; i++) { data[i] = values[i]; }
+        }
 
         // Function operator to access elements
-        inline T& operator()(int line, int column = 0) { return data[line*cs + column]; }
-        inline const T& operator()(int line, int column = 0) const { return data[line*cs + column]; }
+        inline constexpr T& operator()(int line, int column = 0) { return data[line*cs + column]; }
+        inline constexpr const T& operator()(int line, int column = 0) const { return data[line*cs + column]; }
 
         // Array operator to access the data
-        inline T& operator[](int id) { return data[id]; }
-        inline const T& operator[](int id) const { return data[id]; }
+        inline constexpr T& operator[](int id) { return data[id]; }
+        inline constexpr const T& operator[](int id) const { return data[id]; }
+
+        // In-place addition operator
+        inline constexpr void operator+=(const SMat<ls, cs, T>& right) {
+            add(*this, *this, right);
+        }
+
+        // In-place subtraction operator
+        inline constexpr void operator-=(const SMat<ls, cs, T>& right) {
+            sub(*this, *this, right);
+        }
+
+        // In-place scalar multiplication operator
+        inline constexpr void operator*=(const T& right) {
+            mul(*this, *this, right);
+        }
+
+        // In-place scalar division operator
+        inline constexpr void operator/=(const T& right) {
+            div(*this, *this, right);
+        }
+
+        // In-place cross product operator
+        inline constexpr void operator^=(const SMat<ls, cs, T>& right) {
+            static_assert(ls == 3 && cs == 1, "The cross product operator can only be used on 3 element column vectors");
+            cross(*this, *this, right);
+        }
 
         // Raw matrix data
         T data[ls*cs];
@@ -76,617 +142,488 @@ namespace lia {
 
     // =============================== ADDITION ===============================
 
-    // Addition operator for static column vectors of size 2
+    /**
+     * Add two matrices or vectors.
+     * @param result Matrix or vector to write the result to.
+     * @param left Left-hand matrix or vector.
+     * @param right Right-hand matrix or vector.
+    */
+
     template <typename T>
-    inline SVec<2, T> operator+(const SVec<2, T>& left, const SVec<2, T>& right) {
-        SVec<2, T> out;
+    static inline constexpr void add(SVec<2, T>& result, const SVec<2, T>& left, const SVec<2, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0] + b[0];
-        o[1] = a[1] + b[1];
-        return out;
+        T* r = result.data;
+        r[0] = a[0] + b[0];
+        r[1] = a[1] + b[1];
     }
 
-    // Addition operator for static column vectors of size 3
     template <typename T>
-    inline SVec<3, T> operator+(const SVec<3, T>& left, const SVec<3, T>& right) {
-        SVec<3, T> out;
+    static inline constexpr void add(SVec<3, T>& result, const SVec<3, T>& left, const SVec<3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0] + b[0];
-        o[1] = a[1] + b[1];
-        o[2] = a[2] + b[2];
-        return out;
+        T* r = result.data;
+        r[0] = a[0] + b[0];
+        r[1] = a[1] + b[1];
+        r[2] = a[2] + b[2];
     }
 
-    // Addition operator for static column vectors of size 4
     template <typename T>
-    inline SVec<4, T> operator+(const SVec<4, T>& left, const SVec<4, T>& right) {
-        SVec<4, T> out;
+    static inline constexpr void add(SVec<4, T>& result, const SVec<4, T>& left, const SVec<4, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0] + b[0];
-        o[1] = a[1] + b[1];
-        o[2] = a[2] + b[2];
-        o[3] = a[3] + b[3];
-        return out;
+        T* r = result.data;
+        r[0] = a[0] + b[0];
+        r[1] = a[1] + b[1];
+        r[2] = a[2] + b[2];
+        r[3] = a[3] + b[3];
     }
 
-    // Addition operator for static column vectors of sany size
     template <int d, typename T>
-    inline SVec<d, T> operator+(const SVec<d, T>& left, const SVec<d, T>& right) {
-        SVec<d, T> out;
+    static inline constexpr void add(SVec<d, T>& result, const SVec<d, T>& left, const SVec<d, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
+        T* r = result.data;
         for (int i = 0; i < d; i++) {
-            o[i] = a[i] + b[i];
+            r[i] = a[i] + b[i];
         }
-        return out;
     }
 
-    // Addition operator for static square matrices of size 2
     template <typename T>
-    inline SMat<2, 2, T> operator+(const SMat<2, 2, T>& left, const SMat<2, 2, T>& right) {
-        SMat<2, 2, T> out;
+    static inline constexpr void add(SMat<2, 2, T>& result, const SMat<2, 2, T>& left, const SMat<2, 2, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0] + b[0]; o[1] = a[1] + b[1];
-        o[2] = a[2] + b[2]; o[3] = a[3] + b[3];
-        return out;
+        T* r = result.data;
+        r[0] = a[0] + b[0]; r[1] = a[1] + b[1];
+        r[2] = a[2] + b[2]; r[3] = a[3] + b[3];
     }
 
-    // Addition operator for static square matrices of size 3
     template <typename T>
-    inline SMat<3, 3, T> operator+(const SMat<3, 3, T>& left, const SMat<3, 3, T>& right) {
-        SMat<3, 3, T> out;
+    static inline constexpr void add(SMat<3, 3, T>& result, const SMat<3, 3, T>& left, const SMat<3, 3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0] + b[0]; o[1] = a[1] + b[1]; o[2] = a[2] + b[2];
-        o[3] = a[3] + b[3]; o[4] = a[4] + b[4]; o[5] = a[5] + b[5];
-        o[6] = a[6] + b[6]; o[7] = a[7] + b[7]; o[8] = a[8] + b[8];
-        return out;
+        T* r = result.data;
+        r[0] = a[0] + b[0]; r[1] = a[1] + b[1]; r[2] = a[2] + b[2];
+        r[3] = a[3] + b[3]; r[4] = a[4] + b[4]; r[5] = a[5] + b[5];
+        r[6] = a[6] + b[6]; r[7] = a[7] + b[7]; r[8] = a[8] + b[8];
     }
 
-    // Addition operator for static square matrices of size 4
     template <typename T>
-    inline SMat<4, 4, T> operator+(const SMat<4, 4, T>& left, const SMat<4, 4, T>& right) {
-        SMat<4, 4, T> out;
+    static inline constexpr void add(SMat<4, 4, T>& result, const SMat<4, 4, T>& left, const SMat<4, 4, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0] + b[0]; o[1] = a[1] + b[1]; o[2] = a[2] + b[2]; o[3] = a[3] + b[3];
-        o[4] = a[4] + b[4]; o[5] = a[5] + b[5]; o[6] = a[6] + b[6]; o[7] = a[7] + b[7];
-        o[8] = a[8] + b[8]; o[9] = a[9] + b[9]; o[10] = a[10] + b[10]; o[11] = a[11] + b[11];
-        o[12] = a[12] + b[12]; o[13] = a[13] + b[13]; o[14] = a[14] + b[14]; o[15] = a[15] + b[15];
-        return out;
+        T* r = result.data;
+        r[0] = a[0] + b[0]; r[1] = a[1] + b[1]; r[2] = a[2] + b[2]; r[3] = a[3] + b[3];
+        r[4] = a[4] + b[4]; r[5] = a[5] + b[5]; r[6] = a[6] + b[6]; r[7] = a[7] + b[7];
+        r[8] = a[8] + b[8]; r[9] = a[9] + b[9]; r[10] = a[10] + b[10]; r[11] = a[11] + b[11];
+        r[12] = a[12] + b[12]; r[13] = a[13] + b[13]; r[14] = a[14] + b[14]; r[15] = a[15] + b[15];
     }
 
-    // Addition operator for static matrices of sany size
+    template <int ls, int cs, typename T>
+    static inline constexpr void add(SMat<cs, ls, T>& result, const SMat<cs, ls, T>& left, const SMat<cs, ls, T>& right) {
+        const T* a = left.data;
+        const T* b = right.data;
+        T* r = result.data;
+        for (int i = 0; i < ls*cs; i++) {
+            r[i] = a[i] + b[i];
+        }
+    }
+
+    // Addition operator for static matrices and vectors
     template <int ls, int cs, typename T>
     inline SMat<ls, cs, T> operator+(const SMat<ls, cs, T>& left, const SMat<ls, cs, T>& right) {
-        SMat<ls, cs, T> out;
-        const T* a = left.data;
-        const T* b = right.data;
-        T* o = out.data;
-        for (int i = 0; i < ls*cs; i++) {
-            o[i] = a[i] + b[i];
-        }
-        return out;
+        SMat<ls, cs, T> result;
+        add(result, left, right);
+        return result;
     }
 
     // ============================== SUBTRACTION ==============================
 
-    // Addition operator for static column vectors of size 2
+    /**
+     * Subtract two matrices or vectors.
+     * @param result Matrix or vector to write the result to.
+     * @param left Left-hand matrix or vector.
+     * @param right Right-hand matrix or vector.
+    */
+
     template <typename T>
-    inline SVec<2, T> operator-(const SVec<2, T>& left, const SVec<2, T>& right) {
-        SVec<2, T> out;
+    static inline constexpr void sub(SVec<2, T>& result, const SVec<2, T>& left, const SVec<2, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0] - b[0];
-        o[1] = a[1] - b[1];
-        return out;
+        T* r = result.data;
+        r[0] = a[0] - b[0];
+        r[1] = a[1] - b[1];
     }
 
-    // Addition operator for static column vectors of size 3
     template <typename T>
-    inline SVec<3, T> operator-(const SVec<3, T>& left, const SVec<3, T>& right) {
-        SVec<3, T> out;
+    static inline constexpr void sub(SVec<3, T>& result, const SVec<3, T>& left, const SVec<3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0] - b[0];
-        o[1] = a[1] - b[1];
-        o[2] = a[2] - b[2];
-        return out;
+        T* r = result.data;
+        r[0] = a[0] - b[0];
+        r[1] = a[1] - b[1];
+        r[2] = a[2] - b[2];
     }
 
-    // Addition operator for static column vectors of size 4
     template <typename T>
-    inline SVec<4, T> operator-(const SVec<4, T>& left, const SVec<4, T>& right) {
-        SVec<4, T> out;
+    static inline constexpr void sub(SVec<4, T>& result, const SVec<4, T>& left, const SVec<4, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0] - b[0];
-        o[1] = a[1] - b[1];
-        o[2] = a[2] - b[2];
-        o[3] = a[3] - b[3];
-        return out;
+        T* r = result.data;
+        r[0] = a[0] - b[0];
+        r[1] = a[1] - b[1];
+        r[2] = a[2] - b[2];
+        r[3] = a[3] - b[3];
     }
 
-    // Addition operator for static column vectors of sany size
     template <int d, typename T>
-    inline SVec<d, T> operator-(const SVec<d, T>& left, const SVec<d, T>& right) {
-        SVec<d, T> out;
+    static inline constexpr void sub(SVec<d, T>& result, const SVec<d, T>& left, const SVec<d, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
+        T* r = result.data;
         for (int i = 0; i < d; i++) {
-            o[i] = a[i] - b[i];
+            r[i] = a[i] - b[i];
         }
-        return out;
     }
 
-    // Addition operator for static square matrices of size 2
     template <typename T>
-    inline SMat<2, 2, T> operator-(const SMat<2, 2, T>& left, const SMat<2, 2, T>& right) {
-        SMat<2, 2, T> out;
+    static inline constexpr void sub(SMat<2, 2, T>& result, const SMat<2, 2, T>& left, const SMat<2, 2, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0] - b[0]; o[1] = a[1] - b[1];
-        o[2] = a[2] - b[2]; o[3] = a[3] - b[3];
-        return out;
+        T* r = result.data;
+        r[0] = a[0] - b[0]; r[1] = a[1] - b[1];
+        r[2] = a[2] - b[2]; r[3] = a[3] - b[3];
     }
 
-    // Addition operator for static square matrices of size 3
     template <typename T>
-    inline SMat<3, 3, T> operator-(const SMat<3, 3, T>& left, const SMat<3, 3, T>& right) {
-        SMat<3, 3, T> out;
+    static inline constexpr void sub(SMat<3, 3, T>& result, const SMat<3, 3, T>& left, const SMat<3, 3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0] - b[0]; o[1] = a[1] - b[1]; o[2] = a[2] - b[2];
-        o[3] = a[3] - b[3]; o[4] = a[4] - b[4]; o[5] = a[5] - b[5];
-        o[6] = a[6] - b[6]; o[7] = a[7] - b[7]; o[8] = a[8] - b[8];
-        return out;
+        T* r = result.data;
+        r[0] = a[0] - b[0]; r[1] = a[1] - b[1]; r[2] = a[2] - b[2];
+        r[3] = a[3] - b[3]; r[4] = a[4] - b[4]; r[5] = a[5] - b[5];
+        r[6] = a[6] - b[6]; r[7] = a[7] - b[7]; r[8] = a[8] - b[8];
     }
 
-    // Addition operator for static square matrices of size 4
     template <typename T>
-    inline SMat<4, 4, T> operator-(const SMat<4, 4, T>& left, const SMat<4, 4, T>& right) {
-        SMat<4, 4, T> out;
+    static inline constexpr void sub(SMat<4, 4, T>& result, const SMat<4, 4, T>& left, const SMat<4, 4, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0] - b[0]; o[1] = a[1] - b[1]; o[2] = a[2] - b[2]; o[3] = a[3] - b[3];
-        o[4] = a[4] - b[4]; o[5] = a[5] - b[5]; o[6] = a[6] - b[6]; o[7] = a[7] - b[7];
-        o[8] = a[8] - b[8]; o[9] = a[9] - b[9]; o[10] = a[10] - b[10]; o[11] = a[11] - b[11];
-        o[12] = a[12] - b[12]; o[13] = a[13] - b[13]; o[14] = a[14] - b[14]; o[15] = a[15] - b[15];
-        return out;
+        T* r = result.data;
+        r[0] = a[0] - b[0]; r[1] = a[1] - b[1]; r[2] = a[2] - b[2]; r[3] = a[3] - b[3];
+        r[4] = a[4] - b[4]; r[5] = a[5] - b[5]; r[6] = a[6] - b[6]; r[7] = a[7] - b[7];
+        r[8] = a[8] - b[8]; r[9] = a[9] - b[9]; r[10] = a[10] - b[10]; r[11] = a[11] - b[11];
+        r[12] = a[12] - b[12]; r[13] = a[13] - b[13]; r[14] = a[14] - b[14]; r[15] = a[15] - b[15];
     }
 
-    // Addition operator for static matrices of sany size
+    template <int ls, int cs, typename T>
+    static inline constexpr void sub(SMat<cs, ls, T>& result, const SMat<cs, ls, T>& left, const SMat<cs, ls, T>& right) {
+        const T* a = left.data;
+        const T* b = right.data;
+        T* r = result.data;
+        for (int i = 0; i < ls*cs; i++) {
+            r[i] = a[i] - b[i];
+        }
+    }
+
+    // Addition operator for static matrices and vectors
     template <int ls, int cs, typename T>
     inline SMat<ls, cs, T> operator-(const SMat<ls, cs, T>& left, const SMat<ls, cs, T>& right) {
-        SMat<ls, cs, T> out;
-        const T* a = left.data;
-        const T* b = right.data;
-        T* o = out.data;
-        for (int i = 0; i < ls*cs; i++) {
-            o[i] = a[i] - b[i];
-        }
-        return out;
+        SMat<ls, cs, T> result;
+        sub(result, left, right);
+        return result;
     }
 
     // ============================ MULTIPLICATION ============================
 
-    // Multiplication operator for static column vectors of size 2 (scalar on the right)
-    template <typename TV, typename TS>
-    inline SVec<2, TV> operator*(const SVec<2, TV>& left, const TS& right) {
-        SVec<2, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
-        o[0] = a[0] * (TV)right;
-        o[1] = a[1] * (TV)right;
-        return out;
+    /**
+     * Do scalar multiplication between a matrix or vector and a scalar.
+     * @param result Matrix, vector or scalar to write the result to.
+     * @param value Matrix or vector to multiply.
+     * @param right Scalar to multiply the matrix or vector by.
+    */
+
+    template <typename T>
+    static inline constexpr void mul(SVec<2, T>& result, const SVec<2, T>& value, const T& scalar) {
+        const T* v = value.data;
+        T* r = result.data;
+        r[0] = v[0] * scalar;
+        r[1] = v[1] * scalar;
     }
 
-    // Multiplication operator for static column vectors of size 2 (scalar on the left)
-    template <typename TV, typename TS>
-    inline SVec<2, TV> operator*(const TS& left, const SVec<2, TV>& right) {
-        SVec<2, TV> out;
-        const TV* b = right.data;
-        TV* o = out.data;
-        o[0] = b[0] * (TV)left;
-        o[1] = b[1] * (TV)left;
-        return out;
+    template <typename T>
+    static inline constexpr void mul(SVec<3, T>& result, const SVec<3, T>& value, const T& scalar) {
+        const T* v = value.data;
+        T* r = result.data;
+        r[0] = v[0] * scalar;
+        r[1] = v[1] * scalar;
+        r[2] = v[2] * scalar;
     }
 
-    // Multiplication operator for static column vectors of size 3 (scalar on the right)
-    template <typename TV, typename TS>
-    inline SVec<3, TV> operator*(const SVec<3, TV>& left, const TS& right) {
-        SVec<3, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
-        o[0] = a[0] * (TV)right;
-        o[1] = a[1] * (TV)right;
-        o[2] = a[2] * (TV)right;
-        return out;
+    template <typename T>
+    static inline constexpr void mul(SVec<4, T>& result, const SVec<4, T>& value, const T& scalar) {
+        const T* v = value.data;
+        T* r = result.data;
+        r[0] = v[0] * scalar;
+        r[1] = v[1] * scalar;
+        r[2] = v[2] * scalar;
+        r[3] = v[3] * scalar;
     }
 
-    // Multiplication operator for static column vectors of size 3 (scalar on the left)
-    template <typename TV, typename TS>
-    inline SVec<3, TV> operator*(const TS& left, const SVec<3, TV>& right) {
-        SVec<3, TV> out;
-        const TV* b = right.data;
-        TV* o = out.data;
-        o[0] = b[0] * (TV)left;
-        o[1] = b[1] * (TV)left;
-        o[2] = b[2] * (TV)left;
-        return out;
-    }
-
-    // Multiplication operator for static column vectors of size 4 (scalar on the right)
-    template <typename TV, typename TS>
-    inline SVec<4, TV> operator*(const SVec<4, TV>& left, const TS& right) {
-        SVec<4, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
-        o[0] = a[0] * (TV)right;
-        o[1] = a[1] * (TV)right;
-        o[2] = a[2] * (TV)right;
-        o[3] = a[3] * (TV)right;
-        return out;
-    }
-
-    // Multiplication operator for static column vectors of size 4 (scalar on the left)
-    template <typename TV, typename TS>
-    inline SVec<4, TV> operator*(const TS& left, const SVec<4, TV>& right) {
-        SVec<4, TV> out;
-        const TV* b = right.data;
-        TV* o = out.data;
-        o[0] = b[0] * (TV)left;
-        o[1] = b[1] * (TV)left;
-        o[2] = b[2] * (TV)left;
-        o[3] = b[3] * (TV)left;
-        return out;
-    }
-
-    // Multiplication operator for static column vectors of any size (scalar on the right)
-    template <int d, typename TV, typename TS>
-    inline SVec<d, TV> operator*(const SVec<d, TV>& left, const TS& right) {
-        SVec<d, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
+    template <int d, typename T>
+    static inline constexpr void mul(SVec<d, T>& result, const SVec<d, T>& value, const T& scalar) {
+        const T* v = value.data;
+        T* r = result.data;
         for (int i = 0; i < d; i++) {
-            o[i] = a[i] * (TV)right;
+            r[i] = v[i] * scalar;
         }
-        return out;
     }
 
-    // Multiplication operator for static column vectors of any size (scalar on the left)
-    template <int d, typename TV, typename TS>
-    inline SVec<d, TV> operator*(const TS& left, const SVec<d, TV>& right) {
-        SVec<d, TV> out;
-        const TV* b = right.data;
-        TV* o = out.data;
-        for (int i = 0; i < d; i++) {
-            o[i] = b[i] * (TV)left;
-        }
-        return out;
+    template <typename T>
+    static inline constexpr void mul(SMat<2, 2, T>& result, const SMat<2, 2, T>& value, const T& scalar) {
+        const T* m = value.data;
+        T* r = result.data;
+        r[0] = m[0] * scalar; r[1] = m[1] * scalar;
+        r[2] = m[2] * scalar; r[3] = m[3] * scalar;
     }
 
-    // Multiplication operator for static square matrices of size 2 (scalar on the right)
-    template <typename TV, typename TS>
-    inline SMat<2, 2, TV> operator*(const SMat<2, 2, TV>& left, const TS& right) {
-        SMat<2, 2, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
-        o[0] = a[0] * (TV)right; o[1] = a[1] * (TV)right;
-        o[2] = a[2] * (TV)right; o[3] = a[3] * (TV)right;
-        return out;
+    template <typename T>
+    static inline constexpr void mul(SMat<3, 3, T>& result, const SMat<3, 3, T>& value, const T& scalar) {
+        const T* m = value.data;
+        T* r = result.data;
+        r[0] = m[0] * scalar; r[1] = m[1] * scalar; r[2] = m[2] * scalar;
+        r[3] = m[3] * scalar; r[4] = m[4] * scalar; r[5] = m[5] * scalar;
+        r[6] = m[6] * scalar; r[7] = m[7] * scalar; r[8] = m[8] * scalar;
     }
 
-    // Multiplication operator for static square matrices of size 2 (scalar on the left)
-    template <typename TV, typename TS>
-    inline SMat<2, 2, TV> operator*(const TS& left, const SMat<2, 2, TV>& right) {
-        SMat<2, 2, TV> out;
-        const TV* b = right.data;
-        TV* o = out.data;
-        o[0] = b[0] * (TV)left; o[1] = b[1] * (TV)left;
-        o[2] = b[2] * (TV)left; o[3] = b[3] * (TV)left;
-        return out;
+    template <typename T>
+    static inline constexpr void mul(SMat<4, 4, T>& result, const SMat<4, 4, T>& value, const T& scalar) {
+        const T* m = value.data;
+        T* r = result.data;
+        r[0] = m[0] * scalar; r[1] = m[1] * scalar; r[2] = m[2] * scalar; r[3] = m[3] * scalar;
+        r[4] = m[4] * scalar; r[5] = m[5] * scalar; r[6] = m[6] * scalar; r[7] = m[7] * scalar;
+        r[8] = m[8] * scalar; r[9] = m[9] * scalar; r[10] = m[10] * scalar; r[11] = m[11] * scalar;
+        r[12] = m[12] * scalar; r[13] = m[13] * scalar; r[14] = m[14] * scalar; r[15] = m[15] * scalar;
     }
 
-    // Multiplication operator for static square matrices of size 3 (scalar on the right)
-    template <typename TV, typename TS>
-    inline SMat<3, 3, TV> operator*(const SMat<3, 3, TV>& left, const TS& right) {
-        SMat<3, 3, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
-        o[0] = a[0] * (TV)right; o[1] = a[1] * (TV)right; o[2] = a[2] * (TV)right;
-        o[3] = a[3] * (TV)right; o[4] = a[4] * (TV)right; o[5] = a[5] * (TV)right;
-        o[6] = a[6] * (TV)right; o[7] = a[7] * (TV)right; o[8] = a[8] * (TV)right;
-        return out;
-    }
-
-    // Multiplication operator for static square matrices of size 3 (scalar on the left)
-    template <typename TV, typename TS>
-    inline SMat<3, 3, TV> operator*(const TS& left, const SMat<3, 3, TV>& right) {
-        SMat<3, 3, TV> out;
-        const TV* b = right.data;
-        TV* o = out.data;
-        o[0] = b[0] * (TV)left; o[1] = b[1] * (TV)left; o[2] = b[2] * (TV)left;
-        o[3] = b[3] * (TV)left; o[4] = b[4] * (TV)left; o[5] = b[5] * (TV)left;
-        o[6] = b[6] * (TV)left; o[7] = b[7] * (TV)left; o[8] = b[8] * (TV)left;
-        return out;
-    }
-
-    // Multiplication operator for static square matrices of size 4 (scalar on the right)
-    template <typename TV, typename TS>
-    inline SMat<4, 4, TV> operator*(const SMat<4, 4, TV>& left, const TS& right) {
-        SMat<4, 4, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
-        o[0] = a[0] * (TV)right; o[1] = a[1] * (TV)right; o[2] = a[2] * (TV)right; o[3] = a[3] * (TV)right;
-        o[4] = a[4] * (TV)right; o[5] = a[5] * (TV)right; o[6] = a[6] * (TV)right; o[7] = a[7] * (TV)right;
-        o[8] = a[8] * (TV)right; o[9] = a[9] * (TV)right; o[10] = a[10] * (TV)right; o[11] = a[11] * (TV)right;
-        o[12] = a[12] * (TV)right; o[13] = a[13] * (TV)right; o[14] = a[14] * (TV)right; o[15] = a[15] * (TV)right;
-        return out;
-    }
-
-    // Multiplication operator for static square matrices of size 4 (scalar on the left)
-    template <typename TV, typename TS>
-    inline SMat<4, 4, TV> operator*(const TS& left, const SMat<4, 4, TV>& right) {
-        SMat<4, 4, TV> out;
-        const TV* b = right.data;
-        TV* o = out.data;
-        o[0] = b[0] * (TV)left; o[1] = b[1] * (TV)left; o[2] = b[2] * (TV)left; o[3] = b[3] * (TV)left;
-        o[4] = b[4] * (TV)left; o[5] = b[5] * (TV)left; o[6] = b[6] * (TV)left; o[7] = b[7] * (TV)left;
-        o[8] = b[8] * (TV)left; o[9] = b[9] * (TV)left; o[10] = b[10] * (TV)left; o[11] = b[11] * (TV)left;
-        o[12] = b[12] * (TV)left; o[13] = b[13] * (TV)left; o[14] = b[14] * (TV)left; o[15] = b[15] * (TV)left;
-        return out;
-    }
-
-    // Multiplication operator for static column vectors of any size (scalar on the right)
-    template <int ls, int cs, typename TV, typename TS>
-    inline SMat<ls, cs, TV> operator*(const SMat<ls, cs, TV>& left, const TS& right) {
-        SMat<ls, cs, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
+    template <int ls, int cs, typename T>
+    static inline constexpr void mul(SMat<ls, cs, T>& result, const SMat<ls, cs, T>& value, const T& scalar) {
+        const T* m = value.data;
+        T* r = result.data;
         for (int i = 0; i < ls*cs; i++) {
-            o[i] = a[i] * (TV)right;
+            r[i] = m[i] * scalar;
         }
-        return out;
     }
 
-    // Multiplication operator for static column vectors of any size (scalar on the left)
-    template <int ls, int cs, typename TV, typename TS>
-    inline SMat<ls, cs, TV> operator*(const TS& left, const SMat<ls, cs, TV>& right) {
-        SMat<ls, cs, TV> out;
-        const TV* b = right.data;
-        TV* o = out.data;
-        for (int i = 0; i < ls*cs; i++) {
-            o[i] = b[i] * (TV)left;
-        }
-        return out;
+    // Scalar multiplication operator (scalar on the right)
+    template <int ls, int cs, typename T>
+    static inline constexpr SMat<ls, cs, T> operator*(const SMat<ls, cs, T>& left, const T& right) {
+        SMat<ls, cs, T> result;
+        mul(result, left, right);
+        return result;
+    }
+
+    // Scalar multiplication operator (scalar on the left)
+    template <int ls, int cs, typename T>
+    static inline constexpr SMat<ls, cs, T> operator*(const T& left, const SMat<ls, cs, T>& right) {
+        SMat<ls, cs, T> result;
+        mul(result, right, left);
+        return result;
     }
 
     // =============================== DIVISION ===============================
 
-    // Multiplication operator for static column vectors of size 2
-    template <typename TV, typename TS>
-    inline SVec<2, TV> operator/(const SVec<2, TV>& left, const TS& right) {
-        SVec<2, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
-        o[0] = a[0] / (TV)right;
-        o[1] = a[1] / (TV)right;
-        return out;
+    /**
+     * Do scalar divison between a matrix or vector and a scalar.
+     * @param result Matrix, vector or scalar to write the result to.
+     * @param left Matrix or vector to divide.
+     * @param right Scalar to divide the matrix or vector by.
+    */
+
+    template <typename T>
+    static inline constexpr void div(SVec<2, T>& result, const SVec<2, T>& left, const T& right) {
+        const T* a = left.data;
+        T* r = result.data;
+        r[0] = a[0] / (T)right;
+        r[1] = a[1] / (T)right;
     }
 
-    // Multiplication operator for static column vectors of size 3
-    template <typename TV, typename TS>
-    inline SVec<3, TV> operator/(const SVec<3, TV>& left, const TS& right) {
-        SVec<3, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
-        o[0] = a[0] / (TV)right;
-        o[1] = a[1] / (TV)right;
-        o[2] = a[2] / (TV)right;
-        return out;
+    template <typename T>
+    static inline constexpr void div(SVec<3, T>& result, const SVec<3, T>& left, const T& right) {
+        const T* a = left.data;
+        T* r = result.data;
+        r[0] = a[0] / (T)right;
+        r[1] = a[1] / (T)right;
+        r[2] = a[2] / (T)right;
     }
 
-    // Multiplication operator for static column vectors of size 4
-    template <typename TV, typename TS>
-    inline SVec<4, TV> operator/(const SVec<4, TV>& left, const TS& right) {
-        SVec<4, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
-        o[0] = a[0] / (TV)right;
-        o[1] = a[1] / (TV)right;
-        o[2] = a[2] / (TV)right;
-        o[3] = a[3] / (TV)right;
-        return out;
+    template <typename T>
+    static inline constexpr void div(SVec<4, T>& result, const SVec<4, T>& left, const T& right) {
+        const T* a = left.data;
+        T* r = result.data;
+        r[0] = a[0] / (T)right;
+        r[1] = a[1] / (T)right;
+        r[2] = a[2] / (T)right;
+        r[3] = a[3] / (T)right;
     }
 
-    // Multiplication operator for static column vectors of any size
-    template <int d, typename TV, typename TS>
-    inline SVec<d, TV> operator/(const SVec<d, TV>& left, const TS& right) {
-        SVec<d, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
+    template <int d, typename T>
+    static inline constexpr void div(SVec<d, T>& result, const SVec<d, T>& left, const T& right) {
+        const T* a = left.data;
+        T* r = result.data;
         for (int i = 0; i < d; i++) {
-            o[i] = a[i] / (TV)right;
+            r[i] = a[i] / (T)right;
         }
-        return out;
     }
 
-    // Multiplication operator for static square matrices of size 2
-    template <typename TV, typename TS>
-    inline SMat<2, 2, TV> operator/(const SMat<2, 2, TV>& left, const TS& right) {
-        SMat<2, 2, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
-        o[0] = a[0] / (TV)right; o[1] = a[1] / (TV)right;
-        o[2] = a[2] / (TV)right; o[3] = a[3] / (TV)right;
-        return out;
+    template <typename T>
+    static inline constexpr void div(SMat<2, 2, T>& result, const SMat<2, 2, T>& left, const T& right) {
+        const T* a = left.data;
+        T* r = result.data;
+        r[0] = a[0] / (T)right; r[1] = a[1] / (T)right;
+        r[2] = a[2] / (T)right; r[3] = a[3] / (T)right;
     }
 
-    // Multiplication operator for static square matrices of size 3
-    template <typename TV, typename TS>
-    inline SMat<3, 3, TV> operator/(const SMat<3, 3, TV>& left, const TS& right) {
-        SMat<3, 3, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
-        o[0] = a[0] / (TV)right; o[1] = a[1] / (TV)right; o[2] = a[2] / (TV)right;
-        o[3] = a[3] / (TV)right; o[4] = a[4] / (TV)right; o[5] = a[5] / (TV)right;
-        o[6] = a[6] / (TV)right; o[7] = a[7] / (TV)right; o[8] = a[8] / (TV)right;
-        return out;
+    template <typename T>
+    static inline constexpr void div(SMat<3, 3, T>& result, const SMat<3, 3, T>& left, const T& right) {
+        const T* a = left.data;
+        T* r = result.data;
+        r[0] = a[0] / (T)right; r[1] = a[1] / (T)right; r[2] = a[2] / (T)right;
+        r[3] = a[3] / (T)right; r[4] = a[4] / (T)right; r[5] = a[5] / (T)right;
+        r[6] = a[6] / (T)right; r[7] = a[7] / (T)right; r[8] = a[8] / (T)right;
     }
 
-    // Multiplication operator for static square matrices of size 4
-    template <typename TV, typename TS>
-    inline SMat<4, 4, TV> operator/(const SMat<4, 4, TV>& left, const TS& right) {
-        SMat<4, 4, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
-        o[0] = a[0] / (TV)right; o[1] = a[1] / (TV)right; o[2] = a[2] / (TV)right; o[3] = a[3] / (TV)right;
-        o[4] = a[4] / (TV)right; o[5] = a[5] / (TV)right; o[6] = a[6] / (TV)right; o[7] = a[7] / (TV)right;
-        o[8] = a[8] / (TV)right; o[9] = a[9] / (TV)right; o[10] = a[10] / (TV)right; o[11] = a[11] / (TV)right;
-        o[12] = a[12] / (TV)right; o[13] = a[13] / (TV)right; o[14] = a[14] / (TV)right; o[15] = a[15] / (TV)right;
-        return out;
+    template <typename T>
+    static inline constexpr void div(SMat<4, 4, T>& result, const SMat<4, 4, T>& left, const T& right) {
+        const T* a = left.data;
+        T* r = result.data;
+        r[0] = a[0] / (T)right; r[1] = a[1] / (T)right; r[2] = a[2] / (T)right; r[3] = a[3] / (T)right;
+        r[4] = a[4] / (T)right; r[5] = a[5] / (T)right; r[6] = a[6] / (T)right; r[7] = a[7] / (T)right;
+        r[8] = a[8] / (T)right; r[9] = a[9] / (T)right; r[10] = a[10] / (T)right; r[11] = a[11] / (T)right;
+        r[12] = a[12] / (T)right; r[13] = a[13] / (T)right; r[14] = a[14] / (T)right; r[15] = a[15] / (T)right;
     }
 
-    // Multiplication operator for static column vectors of any size
-    template <int ls, int cs, typename TV, typename TS>
-    inline SMat<ls, cs, TV> operator/(const SMat<ls, cs, TV>& left, const TS& right) {
-        SMat<ls, cs, TV> out;
-        const TV* a = left.data;
-        TV* o = out.data;
+    template <int ls, int cs, typename T>
+    static inline constexpr void div(SMat<ls, cs, T>& result, const SMat<ls, cs, T>& left, const T& right) {
+        const T* a = left.data;
+        T* r = result.data;
         for (int i = 0; i < ls*cs; i++) {
-            o[i] = a[i] / (TV)right;
+            r[i] = a[i] / (T)right;
         }
-        return out;
+    }
+
+    // Scalar division operator
+    template <int ls, int cs, typename T>
+    static inline constexpr SMat<ls, cs, T> operator/(const SMat<ls, cs, T>& left, const T& right) {
+        SMat<ls, cs, T> result;
+        div(result, left, right);
+        return result;
     }
 
     // ============================== DOT PRODUCT ==============================
 
-    // Dot product between static column vectors of size 2
+    /**
+     * Take the dot product between two vector or matrices.
+     * @param result Matrix, vector or scalar to write the result to.
+     * @param left Left-hand matrix or vector.
+     * @param right Right-hand matrix or vector.
+    */
+
     template <typename T>
-    inline T operator*(const SVec<2, T>& left, const SVec<2, T>& right) {
+    static inline constexpr void dot(double& result, const SVec<2, T>& left, const SVec<2, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        return a[0]*b[0] + a[1]*b[1];
+        result = a[0]*b[0] + a[1]*b[1];
     }
 
-    // Dot product between static column vectors of size 3
     template <typename T>
-    inline T operator*(const SVec<3, T>& left, const SVec<3, T>& right) {
+    static inline constexpr void dot(double& result, const SVec<3, T>& left, const SVec<3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+        result = a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
     }
 
-    // Dot product between static column vectors of size 4
     template <typename T>
-    inline T operator*(const SVec<4, T>& left, const SVec<4, T>& right) {
+    static inline constexpr void dot(double& result, const SVec<4, T>& left, const SVec<4, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+        result = a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
     }
 
-    // Dot product for static column vectors larger than size 4
     template <int d, typename T>
-    inline T operator*(const SVec<d, T>& left, const SVec<d, T>& right) {
+    static inline constexpr void dot(double& result, const SVec<d, T>& left, const SVec<d, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T result = 0.0;
+        result = 0.0;
         for (int i = 0; i < d; i++) {
             result += a[i]*b[i];
         }
-        return result;
     }
 
-    // Dot product between static square matrix and column vectors of size 2
     template <typename T>
-    inline SVec<2, T> operator*(const SMat<2, 2, T>& left, const SVec<2, T>& right) {
-        SVec<2, T> out;
+    static inline constexpr void dot(SVec<2, T>& result, const SMat<2, 2, T>& left, const SVec<2, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0]*b[0] + a[1]*b[1];
-        o[1] = a[2]*b[0] + a[3]*b[1];
-        return out;
+        T* r = result.data;
+        r[0] = a[0]*b[0] + a[1]*b[1];
+        r[1] = a[2]*b[0] + a[3]*b[1];
     }
 
-    // Dot product between static square matrix and column vectors of size 3
     template <typename T>
-    inline SVec<3, T> operator*(const SMat<3, 3, T>& left, const SVec<3, T>& right) {
-        SVec<3, T> out;
+    static inline constexpr void dot(SVec<3, T>& result, const SMat<3, 3, T>& left, const SVec<3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
-        o[1] = a[3]*b[0] + a[4]*b[1] + a[5]*b[2];
-        o[2] = a[6]*b[0] + a[7]*b[1] + a[8]*b[2];
-        return out;
+        T* r = result.data;
+        r[0] = a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+        r[1] = a[3]*b[0] + a[4]*b[1] + a[5]*b[2];
+        r[2] = a[6]*b[0] + a[7]*b[1] + a[8]*b[2];
     }
 
-    // Dot product between static square matrix and column vectors of size 4
     template <typename T>
-    inline SVec<4, T> operator*(const SMat<4, 4, T>& left, const SVec<4, T>& right) {
-        SVec<4, T> out;
+    static inline constexpr void dot(SVec<4, T>& result, const SMat<4, 4, T>& left, const SVec<4, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
-        o[1] = a[4]*b[0] + a[5]*b[1] + a[6]*b[2] + a[7]*b[3];
-        o[2] = a[8]*b[0] + a[9]*b[1] + a[10]*b[2] + a[11]*b[3];
-        o[3] = a[12]*b[0] + a[13]*b[1] + a[14]*b[2] + a[15]*b[3];
-        return out;
+        T* r = result.data;
+        r[0] = a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+        r[1] = a[4]*b[0] + a[5]*b[1] + a[6]*b[2] + a[7]*b[3];
+        r[2] = a[8]*b[0] + a[9]*b[1] + a[10]*b[2] + a[11]*b[3];
+        r[3] = a[12]*b[0] + a[13]*b[1] + a[14]*b[2] + a[15]*b[3];
     }
 
-    // Dot product between square static matrices and vector of any size
     template <int d, typename T>
-    inline SVec<d, T> operator*(const SMat<d, d, T>& left, const SVec<d, T>& right) {
-        SVec<d, T> out;
+    static inline constexpr void dot(SVec<d, T>& result, const SMat<d, d, T>& left, const SVec<d, T>& right) {
         const T* da = left.data;
         const T* db = right.data;
-        T* o = out.data;
+        T* r = result.data;
         for (int i = 0; i < d; i++) {
             const T* line = &da[i*d];
-            T* const sum = &o[i];
+            T* const sum = &r[i];
             *sum = 0;
             for (int j = 0; j < d; j++) {
                 *sum += line[j]*db[j];
             }
         }
-        return out;
     }
 
-    // TODO: Dot product between square small matrices
+    template <typename T>
+    static inline constexpr void dot(SMat<2, 2, T>& result, const SMat<2, 2, T>& left, const SMat<2, 2, T>& right) {
+        const T* a = left.data;
+        const T* b = right.data;
+        T* r = result.data;
+        r[0] = a[0]*b[0] + a[1]*b[2]; r[1] = a[0]*b[1] + a[1]*b[3];
+        r[2] = a[2]*b[0] + a[3]*b[2]; r[3] = a[2]*b[1] + a[3]*b[3];
+    }
 
-    // Dot product between static matrices of any size
     template <int a, int b, int c, typename T>
-    inline SMat<a, c, T> operator*(const SMat<a, b, T>& left, const SMat<b, c, T>& right) {
-        SMat<a, c, T> out;
+    static inline constexpr void dot(SMat<a, c, T>& result, const SMat<a, b, T>& left, const SMat<b, c, T>& right) {
         const T* da = left.data;
         const T* db = right.data;
-        T* o = out.data;
+        T* r = result.data;
         for (int i = 0; i < a; i++) {
             const T* line = &da[i*b];
             for (int j = 0; j < c; j++) {
                 const T* col = &db[j];
-                T* const sum = &o[i*c + j];
+                T* const sum = &r[i*c + j];
                 *sum = 0;
                 for (int k = 0; k < b; k++) {
                     *sum += line[k] * (*col);
@@ -694,25 +631,46 @@ namespace lia {
                 }
             }
         }
-        return out;
+    }
+
+    // Vector dot product operator
+    template <int d, typename T>
+    static inline constexpr T operator*(const SVec<d, T>& left, const SVec<d, T>& right) {
+        T result;
+        dot(result, left, right);
+        return result;
+    }
+
+    // Matrix dot product operator
+    template <int a, int b, int c, typename T>
+    static inline constexpr SMat<a, c, T> operator*(const SMat<a, b, T>& left, const SMat<b, c, T>& right) {
+        SMat<a, c, T> result;
+        dot(result, left, right);
+        return result;
     }
 
     // ============================= CROSS PRODUCT =============================
 
+    /**
+     * Take the cross product between two 3D vectors.
+     * @param result Vector to write the result to.
+     * @param left Left-hand side vector.
+     * @param right Right-hand side vector.
+    */
     template <typename T>
-    inline SVec<3, T> operator^(const SVec<3, T>& left, const SVec<3, T>& right) {
-        SVec<3, T> out;
+    static inline constexpr void cross(SVec<3, T>& result, const SVec<3, T>& left, const SVec<3, T>& right) {
         const T* a = left.data;
         const T* b = right.data;
-        T* o = out.data;
-        o[0] = a[1]*b[2] - a[2]*b[1];
-        o[1] = a[2]*b[0] - a[0]*b[2];
-        o[2] = a[0]*b[1] - a[1]*b[0];
-        return out;
+        T* r = result.data;
+        r[0] = a[1]*b[2] - a[2]*b[1];
+        r[1] = a[2]*b[0] - a[0]*b[2];
+        r[2] = a[0]*b[1] - a[1]*b[0];
     }
 
-    // ============================= FUNCTION API =============================
-
-    // TODO: Maybe, maybe not
-    // NOTE: To do it, move the code of the operators to inline functions
+    template <typename T>
+    static inline constexpr SVec<3, T> operator^(const SVec<3, T>& left, const SVec<3, T>& right) {
+        SVec<3, T> result;
+        cross(result, left, right);
+        return result;
+    }
 }
