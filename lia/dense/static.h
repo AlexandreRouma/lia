@@ -1,6 +1,6 @@
 #pragma once
 #include <initializer_list>
-#include "force_inline.h"
+#include "../force_inline.h"
 
 namespace lia {
     /**

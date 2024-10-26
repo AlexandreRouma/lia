@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdexcept>
-#include "../lia/static.h"
+#include "../lia/dense/static.h"
 
 template <int ls, int cs>
 void testAdd() {

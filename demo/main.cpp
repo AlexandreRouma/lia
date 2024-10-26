@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <chrono>
-#include "../lia/static.h"
+#include "../lia/dense/static.h"
+#include "../lia/dense/dynamic.h"
 #include <stdlib.h>
 #include <complex>
 #include "tests.h"
@@ -125,10 +126,11 @@ int main() {
 
     lia::Vec3f a;
     lia::Vec3f b;
-
-    auto c = a*b.T();
+    lia::Vec3f c;
 
     lia::norm(a);
+
+    lia::cross(c, a, b);
 
     // // Allocate the test vectors
     // printf("Allocating vectors\n");
