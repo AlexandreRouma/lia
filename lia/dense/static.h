@@ -164,6 +164,78 @@ namespace lia {
     using Mat3i = SMati<3, 3>;
     using Mat4i = SMati<4, 4>;
 
+    // ================================= CLEAR =================================
+
+    /**
+     * Clear a matrix or vector with a specific value (zero by default).
+     * @param result Matrix or vector to clear.
+     * @param value Value to clear the matrix or vector with.
+    */
+
+    template <typename T>
+    static constexpr LIA_FORCE_INLINE void clear(const SVec<2, T>& result, const T& value = 0.0) {
+        T* r = result.data;
+        r[0] = value;
+        r[1] = value;
+    }
+
+    template <typename T>
+    static constexpr LIA_FORCE_INLINE void clear(const SVec<3, T>& result, const T& value = 0.0) {
+        T* r = result.data;
+        r[0] = value;
+        r[1] = value;
+        r[2] = value;
+    }
+
+    template <typename T>
+    static constexpr LIA_FORCE_INLINE void clear(const SVec<4, T>& result, const T& value = 0.0) {
+        T* r = result.data;
+        r[0] = value;
+        r[1] = value;
+        r[2] = value;
+        r[3] = value;
+    }
+
+    template <int d, typename T>
+    static constexpr LIA_FORCE_INLINE void clear(const SVec<d, T>& result, const T& value = 0.0) {
+        T* r = result.data;
+        for (int i = 0; i < d; i++) {
+            r[i] = value;
+        }
+    }
+
+    template <typename T>
+    static constexpr LIA_FORCE_INLINE void clear(const SMat<2, 2, T>& result, const T& value = 0.0) {
+        T* r = result.data;
+        r[0] = value; r[1] = value;
+        r[2] = value; r[3] = value;
+    }
+
+    template <typename T>
+    static constexpr LIA_FORCE_INLINE void clear(const SMat<3, 3, T>& result, const T& value = 0.0) {
+        T* r = result.data;
+        r[0] = value; r[1] = value; r[2] = value;
+        r[3] = value; r[4] = value; r[5] = value;
+        r[6] = value; r[7] = value; r[8] = value;
+    }
+
+    template <typename T>
+    static constexpr LIA_FORCE_INLINE void clear(const SMat<4, 4, T>& result, const T& value = 0.0) {
+        T* r = result.data;
+        r[0] = value; r[1] = value; r[2] = value; r[3] = value;
+        r[4] = value; r[5] = value; r[6] = value; r[7] = value;
+        r[8] = value; r[9] = value; r[10] = value; r[11] = value;
+        r[12] = value; r[13] = value; r[14] = value; r[15] = value;
+    }
+
+    template <int ls, int cs, typename T>
+    static constexpr LIA_FORCE_INLINE void clear(const SMat<ls, cs, T>& result, const T& value = 0.0) {
+        T* r = result.data;
+        for (int i = 0; i < ls*cs; i++) {
+            r[i] = value;
+        }
+    }
+
     // =============================== TRANSPOSE ===============================
 
     /**

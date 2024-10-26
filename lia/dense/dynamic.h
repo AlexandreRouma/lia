@@ -71,6 +71,18 @@ namespace lia {
     using DMatf = DMat<float>;
     using DMati = DMat<int>;
 
+    // ================================= CLEAR =================================
+
+    /**
+     * Clear a matrix or vector with a specific value (zero by default).
+     * @param result Matrix or vector to clear.
+     * @param value Value to clear the matrix or vector with.
+    */
+    template <typename T>
+    void clear(DVec<T>& result, T value = 0.0);
+    template <typename T>
+    void clear(DMat<T>& result, T value = 0.0);
+
     // =============================== TRANSPOSE ===============================
 
     /**

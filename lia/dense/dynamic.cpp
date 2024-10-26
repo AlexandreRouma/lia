@@ -33,6 +33,31 @@ namespace lia {
     template class DVec<double>;
     template class DVec<float>;
     template class DVec<int>;
+
+    template <typename T>
+    void clear(DVec<T>& result, T value) {
+        T* r = result.data();
+        const int d = result.ls;
+        for (int i = 0; i < d; i++) {
+            r[i] = value;
+        }
+    }
+    template void clear(DVec<double>& result, double value);
+    template void clear(DVec<float>& result, float value);
+    template void clear(DVec<int>& result, int value);
+
+    template <typename T>
+    void clear(DMat<T>& result, T value) {
+        T* r = result.data();
+        const int d = result.ls*result.cs;
+        for (int i = 0; i < d; i++) {
+            r[i] = value;
+        }
+    }
+    template void clear(DMat<double>& result, double value);
+    template void clear(DMat<float>& result, float value);
+    template void clear(DMat<int>& result, int value);
+
     
     template <typename T>
     void transpose(DMat<T>& result, const DVec<T>& value) {
@@ -204,22 +229,57 @@ namespace lia {
     void dot(DVec<T>& result, const DMat<T>& left, const DVec<T>& right) {
         const T* da = left.data();
         const T* db = right.data();
+        const int ls = left.ls;
+        const int d = right.ls;
         T* r = result.data();
-        // TODO
+        for (int i = 0; i < ls; i++) {
+            const T* line = &da[i*d];
+            T* const sum = &r[i];
+            *sum = 0;
+            for (int j = 0; j < d; j++) {
+                *sum += line[j]*db[j];
+            }
+        }
     }
     template void dot(DVec<double>& result, const DMat<double>& left, const DVec<double>& right);
     template void dot(DVec<float>& result, const DMat<float>& left, const DVec<float>& right);
     template void dot(DVec<int>& result, const DMat<int>& left, const DVec<int>& right);
 
-    
     template <typename T>
     void dot(DMat<T>& result, const DMat<T>& left, const DMat<T>& right) {
         const T* da = left.data();
         const T* db = right.data();
+        const int a = left.ls;
+        const int b = left.cs;
+        const int c = right.cs;
         T* r = result.data();
-        // TODO
+        for (int i = 0; i < a; i++) {
+            const T* line = &da[i*b];
+            for (int j = 0; j < c; j++) {
+                const T* col = &db[j];
+                T* const sum = &r[i*c + j];
+                *sum = 0;
+                for (int k = 0; k < b; k++) {
+                    *sum += line[k] * (*col);
+                    col += c;
+                }
+            }
+        }
     }
     template void dot(DMat<double>& result, const DMat<double>& left, const DMat<double>& right);
     template void dot(DMat<float>& result, const DMat<float>& left, const DMat<float>& right);
     template void dot(DMat<int>& result, const DMat<int>& left, const DMat<int>& right);
+
+    template <typename T>
+    void cross(DVec<T>& result, const DVec<T>& left, const DVec<T>& right) {
+        const T* a = left.data();
+        const T* b = right.data();
+        T* r = result.data();
+        r[0] = a[1]*b[2] - a[2]*b[1];
+        r[1] = a[2]*b[0] - a[0]*b[2];
+        r[2] = a[0]*b[1] - a[1]*b[0];
+    }
+    template void cross(DVec<double>& result, const DVec<double>& left, const DVec<double>& right);
+    template void cross(DVec<float>& result, const DVec<float>& left, const DVec<float>& right);
+    template void cross(DVec<int>& result, const DVec<int>& left, const DVec<int>& right);
 }
