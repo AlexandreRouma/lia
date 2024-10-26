@@ -2,6 +2,9 @@
 #include "../force_inline.h"
 
 namespace lia {
+    /**
+     * Dynamically allocated dense matrix.
+    */
     template <typename DT>
     class DMat {
     public:
@@ -39,11 +42,14 @@ namespace lia {
         // Number of columns
         const int cs;
 
-private:
+    private:
         // Raw matrix data
         DT* _data;
     };
 
+    /**
+     * Dynamically allocated vector. Equivalent to a statically allocated matrix with a single column.
+    */
     template <typename DT>
     class DVec : public DMat<DT> {
     public:
