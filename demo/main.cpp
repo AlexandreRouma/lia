@@ -128,6 +128,8 @@ int main() {
 
     auto c = a*b.T();
 
+    lia::norm(a);
+
     // // Allocate the test vectors
     // printf("Allocating vectors\n");
     // lia::SMatd<VEC_SIZE, VEC_SIZE>* a = new lia::SMatd<VEC_SIZE, VEC_SIZE>[ITERATIONS];

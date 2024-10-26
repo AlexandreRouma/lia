@@ -99,10 +99,25 @@ namespace lia {
             cross(*this, *this, right);
         }
 
+        /**
+         * Transpose a matrix or vector.
+         * @param result Matrix or vector to write the result to.
+         * @param left Matrix or vector to transpose.
+        */
         constexpr LIA_FORCE_INLINE SMat<cs, ls, DT> T() {
             SMat<cs, ls, DT> result;
             transpose(result, *this);
             return result;
+        }
+
+        /**
+         * Compute the euclidian norm of a vector.
+         * @param value Vector to take the euclidian norm of.
+         * @return Euclidian norm of the vector.
+        */
+        LIA_FORCE_INLINE DT norm() {
+            static_assert(cs == 1, "Can only take the norm of a vector");
+            return lia::norm(*this);
         }
 
         // Raw matrix data
@@ -225,6 +240,62 @@ namespace lia {
             for (int j = 0; j < cs; j++) {
                 r[j*ls + i] = line[j];
             }
+        }
+    }
+
+    // ================================= NORM =================================
+
+    /**
+     * Compute the euclidian norm of a vector.
+     * @param value Vector to take the euclidian norm of.
+     * @return Euclidian norm of the vector.
+    */
+
+    template <typename T>
+    static LIA_FORCE_INLINE T norm(const SVec<2, T>& value) {
+        const T* v = value.data;
+        if constexpr (std::is_same_v<T, float>) {
+            return sqrtf(v[0]*v[0] + v[1]*v[1]);
+        }
+        else {
+            return sqrt(v[0]*v[0] + v[1]*v[1]);
+        }
+    }
+
+    template <typename T>
+    static LIA_FORCE_INLINE T norm(const SVec<3, T>& value) {
+        const T* v = value.data;
+        if constexpr (std::is_same_v<T, float>) {
+            return sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+        }
+        else {
+            return sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+        }
+    }
+
+    template <typename T>
+    static LIA_FORCE_INLINE T norm(const SVec<3, T>& value) {
+        const T* v = value.data;
+        if constexpr (std::is_same_v<T, float>) {
+            return sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]);
+        }
+        else {
+            return sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]);
+        }
+    }
+
+    template <int d, typename T>
+    static LIA_FORCE_INLINE T norm(const SVec<3, T>& value) {
+        const T* v = value.data;
+        T sum = 0.0;
+        for (int i = 0; i < d; i++) {
+            sum += v[i]*v[i];
+        }
+        if constexpr (std::is_same_v<T, float>) {
+            return sqrtf(sum);
+        }
+        else {
+            return sqrt(sum);
         }
     }
 
