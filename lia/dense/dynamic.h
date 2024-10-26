@@ -1,4 +1,5 @@
 #pragma once
+#include "../force_inline.h"
 
 namespace lia {
     template <typename DT>
@@ -17,14 +18,30 @@ namespace lia {
         // Destructor
         ~DMat();
 
+        // Function operator to access elements
+        constexpr LIA_FORCE_INLINE DT& operator()(int line, int column = 0) { return _data[line*cs + column]; }
+        constexpr LIA_FORCE_INLINE const DT& operator()(int line, int column = 0) const { return _data[line*cs + column]; }
+
+        // Array operator to access the data
+        constexpr LIA_FORCE_INLINE DT& operator[](int id) { return _data[id]; }
+        constexpr LIA_FORCE_INLINE const DT& operator[](int id) const { return _data[id]; }
+
+        /**
+         * Get the raw data buffer from the matrix.
+         * @return Raw data buffer containing the matrix data.
+        */
+        constexpr LIA_FORCE_INLINE DT* data() { return _data; }
+        constexpr LIA_FORCE_INLINE const DT* data() const { return _data; }
+
         // Number of lines
         const int ls;
 
         // Number of columns
         const int cs;
 
-    private:
-        DT* data = NULL;
+private:
+        // Raw matrix data
+        DT* _data;
     };
 
     template <typename DT>
@@ -130,6 +147,12 @@ namespace lia {
      * @param left Left-hand matrix or vector.
      * @param right Right-hand matrix or vector.
     */
+    template <typename T>
+    void dot(T& result, const DVec<T>& left, const DVec<T>& right);
+    template <typename T>
+    void dot(DVec<T>& result, const DMat<T>& left, const DVec<T>& right);
+    template <typename T>
+    void dot(DMat<T>& result, const DMat<T>& left, const DMat<T>& right);
 
     // ============================= CROSS PRODUCT =============================
 
