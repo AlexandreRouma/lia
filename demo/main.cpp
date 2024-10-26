@@ -119,6 +119,15 @@ int main() {
         return -1;
     }
 
+    lia::SMatd<4, 3> testMat;
+
+    auto test = testMat.T() * testMat;
+
+    lia::Vec3f a;
+    lia::Vec3f b;
+
+    auto c = a*b.T();
+
     // // Allocate the test vectors
     // printf("Allocating vectors\n");
     // lia::SMatd<VEC_SIZE, VEC_SIZE>* a = new lia::SMatd<VEC_SIZE, VEC_SIZE>[ITERATIONS];
