@@ -1,13 +1,76 @@
 #pragma once
 #include <initializer_list>
+#include <variant>
 #include "../force_inline.h"
 
 namespace lia {
+    template <typename T>
+    struct _XY {
+        union {
+            T data[2];
+            struct {
+                T x;
+                T y;
+            };
+            struct {
+                T u;
+                T v;
+            };
+        };
+    };
+
+    template <typename T>
+    struct _XYZ {
+        union {
+            T data[3];
+            struct {
+                T x;
+                T y;
+                T z;
+            };
+            struct {
+                T r;
+                T g;
+                T b;
+            };
+        };
+    };
+
+    template <typename T>
+    struct _XYZW {
+        union {
+            T data[4];
+            struct {
+                T x;
+                T y;
+                T z;
+                T w;
+            };
+            struct {
+                T r;
+                T g;
+                T b;
+                T a;
+            };
+        };
+    };
+
+    template <typename T, int size>
+    class _DATA {
+    public:
+        T data[size];
+    };
+
+    template <int ls, int cs, typename T>
+    using _SMatBase =   std::conditional_t<ls*cs == 2, _XY<T>,
+                        std::conditional_t<ls*cs == 3, _XYZ<T>,
+                        std::conditional_t<(ls == 4 && cs == 1) || (ls == 1 && cs == 4), _XYZW<T>, _DATA<T, ls*cs>>>>;
+
     /**
      * Statically allocated dense matrix.
     */
     template <int ls, int cs, typename DT>
-    class SMat {
+    class SMat : public _SMatBase<ls, cs, DT> {
     public:
         // Default constructor
         constexpr LIA_FORCE_INLINE SMat() {}
@@ -18,7 +81,7 @@ namespace lia {
         */
         constexpr LIA_FORCE_INLINE SMat(DT value) {
             // Set all element to the same value
-            for (int i = 0; i < ls*cs; i++) { data[i] = value; }
+            for (int i = 0; i < ls*cs; i++) { _SMatBase<ls, cs, DT>::data[i] = value; }
         }
 
         /**
@@ -27,8 +90,8 @@ namespace lia {
         */
         constexpr LIA_FORCE_INLINE SMat(DT v1, DT v2) {
             static_assert(ls == 2 && cs == 1, "The size of the matrix/vector is not 2x1");
-            data[0] = v1;
-            data[1] = v2;
+            _SMatBase<ls, cs, DT>::data[0] = v1;
+            _SMatBase<ls, cs, DT>::data[1] = v2;
         }
 
         /**
@@ -37,9 +100,9 @@ namespace lia {
         */
         constexpr LIA_FORCE_INLINE SMat(DT v1, DT v2, DT v3) {
             static_assert(ls == 3 && cs == 1, "The size of the matrix/vector is not 3x1");
-            data[0] = v1;
-            data[1] = v2;
-            data[2] = v3;
+            _SMatBase<ls, cs, DT>::data[0] = v1;
+            _SMatBase<ls, cs, DT>::data[1] = v2;
+            _SMatBase<ls, cs, DT>::data[2] = v3;
         }
 
         /**
@@ -48,10 +111,10 @@ namespace lia {
         */
         constexpr LIA_FORCE_INLINE SMat(DT v1, DT v2, DT v3, DT v4) {
             static_assert(ls == 4 && cs == 1, "The size of the matrix/vector is not 4x1");
-            data[0] = v1;
-            data[1] = v2;
-            data[2] = v3;
-            data[3] = v4;
+            _SMatBase<ls, cs, DT>::data[0] = v1;
+            _SMatBase<ls, cs, DT>::data[1] = v2;
+            _SMatBase<ls, cs, DT>::data[2] = v3;
+            _SMatBase<ls, cs, DT>::data[3] = v4;
         }
 
         /**
@@ -60,16 +123,19 @@ namespace lia {
         */
         constexpr LIA_FORCE_INLINE SMat(std::initializer_list<DT> values) {
             // Set all element to their given value
-            for (int i = 0; i < ls*cs; i++) { data[i] = values[i]; }
+            int i = 0;
+            for (DT v : values) {
+                _SMatBase<ls, cs, DT>::data[i++] = v;
+            }
         }
 
         // Function operator to access elements
-        constexpr LIA_FORCE_INLINE DT& operator()(int line, int column = 0) { return data[line*cs + column]; }
-        constexpr LIA_FORCE_INLINE const DT& operator()(int line, int column = 0) const { return data[line*cs + column]; }
+        constexpr LIA_FORCE_INLINE DT& operator()(int line, int column = 0) { return _SMatBase<ls, cs, DT>::data[line*cs + column]; }
+        constexpr LIA_FORCE_INLINE const DT& operator()(int line, int column = 0) const { return _SMatBase<ls, cs, DT>::data[line*cs + column]; }
 
         // Array operator to access the data
-        constexpr LIA_FORCE_INLINE DT& operator[](int id) { return data[id]; }
-        constexpr LIA_FORCE_INLINE const DT& operator[](int id) const { return data[id]; }
+        constexpr LIA_FORCE_INLINE DT& operator[](int id) { return _SMatBase<ls, cs, DT>::data[id]; }
+        constexpr LIA_FORCE_INLINE const DT& operator[](int id) const { return _SMatBase<ls, cs, DT>::data[id]; }
 
         // In-place addition operator
         constexpr LIA_FORCE_INLINE void operator+=(const SMat<ls, cs, DT>& right) {
@@ -99,6 +165,14 @@ namespace lia {
             cross(*this, *this, right);
         }
 
+        // Cast operator
+        template <typename TB>
+        constexpr LIA_FORCE_INLINE operator SMat<ls, cs, TB>() {
+            SMat<ls, cs, TB> result;
+            cast(result, *this);
+            return result;
+        }
+
         /**
          * Transpose a matrix or vector.
          * @param result Matrix or vector to write the result to.
@@ -115,13 +189,10 @@ namespace lia {
          * @param value Vector to take the euclidian norm of.
          * @return Euclidian norm of the vector.
         */
-        LIA_FORCE_INLINE DT norm() {
+        LIA_FORCE_INLINE DT N() {
             static_assert(cs == 1, "Can only take the norm of a vector");
-            return lia::norm(*this);
+            return norm(*this);
         }
-
-        // Raw matrix data
-        DT data[ls*cs];
     };
 
     /**
@@ -164,6 +235,86 @@ namespace lia {
     using Mat3i = SMati<3, 3>;
     using Mat4i = SMati<4, 4>;
 
+    // ================================= CAST =================================
+
+    /**
+     * Cast a matrix or vector to another type.
+     * @param result Matrix or vector of the destination type.
+     * @param value Matrix or vector of the source type.
+    */
+
+    template <typename TA, typename TB>
+    static constexpr LIA_FORCE_INLINE void cast(SVec<2, TB>& result, const SVec<2, TA>& value) {
+        const TA* a = value.data;
+        TB* r = result.data;
+        r[0] = (TB)a[0];
+        r[1] = (TB)a[1];
+    }
+
+    template <typename TA, typename TB>
+    static constexpr LIA_FORCE_INLINE void cast(SVec<3, TB>& result, const SVec<3, TA>& value) {
+        const TA* a = value.data;
+        TB* r = result.data;
+        r[0] = (TB)a[0];
+        r[1] = (TB)a[1];
+        r[2] = (TB)a[2];
+    }
+
+    template <typename TA, typename TB>
+    static constexpr LIA_FORCE_INLINE void cast(SVec<4, TB>& result, const SVec<4, TA>& value) {
+        const TA* a = value.data;
+        TB* r = result.data;
+        r[0] = (TB)a[0];
+        r[1] = (TB)a[1];
+        r[2] = (TB)a[2];
+        r[3] = (TB)a[3];
+    }
+
+    template <int d, typename TA, typename TB>
+    static constexpr LIA_FORCE_INLINE void cast(SVec<d, TB>& result, const SVec<d, TA>& value) {
+        const TA* a = value.data;
+        TB* r = result.data;
+        for (int i = 0; i < d; i++) {
+            r[i] = (TB)a[i];
+        }
+    }
+
+    template <typename TA, typename TB>
+    static constexpr LIA_FORCE_INLINE void cast(SMat<2, 2, TB>& result, const SMat<2, 2, TA>& value) {
+        const TA* a = value.data;
+        TB* r = result.data;
+        r[0] = (TB)a[0]; r[1] = (TB)a[1];
+        r[2] = (TB)a[2]; r[3] = (TB)a[3];
+    }
+
+    template <typename TA, typename TB>
+    static constexpr LIA_FORCE_INLINE void cast(SMat<3, 3, TB>& result, const SMat<3, 3, TA>& value) {
+        const TA* a = value.data;
+        TB* r = result.data;
+        r[0] = (TB)a[0]; r[1] = (TB)a[1]; r[2] = (TB)a[2];
+        r[3] = (TB)a[3]; r[4] = (TB)a[4]; r[5] = (TB)a[5];
+        r[6] = (TB)a[6]; r[7] = (TB)a[7]; r[8] = (TB)a[8];
+    }
+
+    template <typename TA, typename TB>
+    static constexpr LIA_FORCE_INLINE void cast(SMat<4, 4, TB>& result, const SMat<4, 4, TA>& value) {
+        const TA* a = value.data;
+        TB* r = result.data;
+        r[0] = (TB)a[0]; r[1] = (TB)a[1]; r[2] = (TB)a[2]; r[3] = (TB)a[3]; 
+        r[4] = (TB)a[4]; r[5] = (TB)a[5]; r[6] = (TB)a[6]; r[7] = (TB)a[7];
+        r[8] = (TB)a[8]; r[9] = (TB)a[9]; r[10] = (TB)a[10]; r[11] = (TB)a[11];
+        r[12] = (TB)a[12]; r[13] = (TB)a[13]; r[14] = (TB)a[14]; r[15] = (TB)a[15];
+    }
+
+    template <int ls, int cs, typename TA, typename TB>
+    static constexpr LIA_FORCE_INLINE void cast(SMat<ls, cs, TB>& result, const SMat<ls, cs, TA>& value) {
+        const TA* a = value.data;
+        TB* r = result.data;
+        for (int i = 0; i < ls*cs; i++) {
+            r[i] = (TB)a[i];
+        }
+    }
+
     // ================================= CLEAR =================================
 
     /**
@@ -173,14 +324,14 @@ namespace lia {
     */
 
     template <typename T>
-    static constexpr LIA_FORCE_INLINE void clear(const SVec<2, T>& result, const T& value = 0.0) {
+    static constexpr LIA_FORCE_INLINE void clear(SVec<2, T>& result, const T& value = 0.0) {
         T* r = result.data;
         r[0] = value;
         r[1] = value;
     }
 
     template <typename T>
-    static constexpr LIA_FORCE_INLINE void clear(const SVec<3, T>& result, const T& value = 0.0) {
+    static constexpr LIA_FORCE_INLINE void clear(SVec<3, T>& result, const T& value = 0.0) {
         T* r = result.data;
         r[0] = value;
         r[1] = value;
@@ -188,7 +339,7 @@ namespace lia {
     }
 
     template <typename T>
-    static constexpr LIA_FORCE_INLINE void clear(const SVec<4, T>& result, const T& value = 0.0) {
+    static constexpr LIA_FORCE_INLINE void clear(SVec<4, T>& result, const T& value = 0.0) {
         T* r = result.data;
         r[0] = value;
         r[1] = value;
@@ -197,7 +348,7 @@ namespace lia {
     }
 
     template <int d, typename T>
-    static constexpr LIA_FORCE_INLINE void clear(const SVec<d, T>& result, const T& value = 0.0) {
+    static constexpr LIA_FORCE_INLINE void clear(SVec<d, T>& result, const T& value = 0.0) {
         T* r = result.data;
         for (int i = 0; i < d; i++) {
             r[i] = value;
@@ -205,14 +356,14 @@ namespace lia {
     }
 
     template <typename T>
-    static constexpr LIA_FORCE_INLINE void clear(const SMat<2, 2, T>& result, const T& value = 0.0) {
+    static constexpr LIA_FORCE_INLINE void clear(SMat<2, 2, T>& result, const T& value = 0.0) {
         T* r = result.data;
         r[0] = value; r[1] = value;
         r[2] = value; r[3] = value;
     }
 
     template <typename T>
-    static constexpr LIA_FORCE_INLINE void clear(const SMat<3, 3, T>& result, const T& value = 0.0) {
+    static constexpr LIA_FORCE_INLINE void clear(SMat<3, 3, T>& result, const T& value = 0.0) {
         T* r = result.data;
         r[0] = value; r[1] = value; r[2] = value;
         r[3] = value; r[4] = value; r[5] = value;
@@ -220,7 +371,7 @@ namespace lia {
     }
 
     template <typename T>
-    static constexpr LIA_FORCE_INLINE void clear(const SMat<4, 4, T>& result, const T& value = 0.0) {
+    static constexpr LIA_FORCE_INLINE void clear(SMat<4, 4, T>& result, const T& value = 0.0) {
         T* r = result.data;
         r[0] = value; r[1] = value; r[2] = value; r[3] = value;
         r[4] = value; r[5] = value; r[6] = value; r[7] = value;
@@ -229,7 +380,7 @@ namespace lia {
     }
 
     template <int ls, int cs, typename T>
-    static constexpr LIA_FORCE_INLINE void clear(const SMat<ls, cs, T>& result, const T& value = 0.0) {
+    static constexpr LIA_FORCE_INLINE void clear(SMat<ls, cs, T>& result, const T& value = 0.0) {
         T* r = result.data;
         for (int i = 0; i < ls*cs; i++) {
             r[i] = value;
@@ -248,59 +399,59 @@ namespace lia {
     static constexpr LIA_FORCE_INLINE void transpose(SMat<1, 2, T>& result, const SVec<2, T>& value) {
         const T* v = value.data;
         T* r = result.data;
-        r[0] = data[0];
-        r[1] = data[1];
+        r[0] = v[0];
+        r[1] = v[1];
     }
 
     template <typename T>
     static constexpr LIA_FORCE_INLINE void transpose(SMat<1, 3, T>& result, const SVec<3, T>& value) {
         const T* v = value.data;
         T* r = result.data;
-        r[0] = data[0];
-        r[1] = data[1];
-        r[2] = data[2];
+        r[0] = v[0];
+        r[1] = v[1];
+        r[2] = v[2];
     }
 
     template <typename T>
     static constexpr LIA_FORCE_INLINE void transpose(SMat<1, 4, T>& result, const SVec<4, T>& value) {
         const T* v = value.data;
         T* r = result.data;
-        r[0] = data[0];
-        r[1] = data[1];
-        r[2] = data[2];
-        r[3] = data[3];
+        r[0] = v[0];
+        r[1] = v[1];
+        r[2] = v[2];
+        r[3] = v[3];
     }
 
     template <int d, typename T>
     static constexpr LIA_FORCE_INLINE void transpose(SMat<1, d, T>& result, const SVec<d, T>& value) {
-        memcpy(result.data, value.data);
+        memcpy(result.data, value.data, d*sizeof(T));
     }
 
     template <typename T>
     static constexpr LIA_FORCE_INLINE void transpose(SMat<2, 2, T>& result, const SMat<2, 2, T>& value) {
         const T* v = value.data;
         T* r = result.data;
-        r[0] = data[0]; r[1] = data[2];
-        r[2] = data[1]; r[3] = data[3];
+        r[0] = v[0]; r[1] = v[2];
+        r[2] = v[1]; r[3] = v[3];
     }
 
     template <typename T>
     static constexpr LIA_FORCE_INLINE void transpose(SMat<3, 3, T>& result, const SMat<3, 3, T>& value) {
         const T* v = value.data;
         T* r = result.data;
-        r[0] = data[0]; r[1] = data[3]; r[2] = data[6];
-        r[3] = data[1]; r[4] = data[4]; r[5] = data[7];
-        r[6] = data[2]; r[7] = data[5]; r[8] = data[8];
+        r[0] = v[0]; r[1] = v[3]; r[2] = v[6];
+        r[3] = v[1]; r[4] = v[4]; r[5] = v[7];
+        r[6] = v[2]; r[7] = v[5]; r[8] = v[8];
     }
 
     template <typename T>
     static constexpr LIA_FORCE_INLINE void transpose(SMat<4, 4, T>& result, const SMat<4, 4, T>& value) {
         const T* v = value.data;
         T* r = result.data;
-        r[0] = data[0]; r[1] = data[4]; r[2] = data[8]; r[3] = data[12];
-        r[4] = data[1]; r[5] = data[5]; r[6] = data[9]; r[7] = data[13];
-        r[8] = data[2]; r[9] = data[6]; r[10] = data[10]; r[11] = data[14];
-        r[12] = data[3]; r[13] = data[7]; r[14] = data[11]; r[15] = data[15];
+        r[0] = v[0]; r[1] = v[4]; r[2] = v[8]; r[3] = v[12];
+        r[4] = v[1]; r[5] = v[5]; r[6] = v[9]; r[7] = v[13];
+        r[8] = v[2]; r[9] = v[6]; r[10] = v[10]; r[11] = v[14];
+        r[12] = v[3]; r[13] = v[7]; r[14] = v[11]; r[15] = v[15];
     }
 
     template <int ls, int cs, typename T>
@@ -346,7 +497,7 @@ namespace lia {
     }
 
     template <typename T>
-    static LIA_FORCE_INLINE T norm(const SVec<3, T>& value) {
+    static LIA_FORCE_INLINE T norm(const SVec<4, T>& value) {
         const T* v = value.data;
         if constexpr (std::is_same_v<T, float>) {
             return sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]);
@@ -357,7 +508,7 @@ namespace lia {
     }
 
     template <int d, typename T>
-    static LIA_FORCE_INLINE T norm(const SVec<3, T>& value) {
+    static LIA_FORCE_INLINE T norm(const SVec<d, T>& value) {
         const T* v = value.data;
         T sum = 0.0;
         for (int i = 0; i < d; i++) {

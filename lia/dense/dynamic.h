@@ -18,6 +18,12 @@ namespace lia {
         */
         DMat(int lines, int columns);
 
+        // Copy constructor
+        DMat(const DMat& copy);
+
+        // Move constructor
+        DMat(DMat&& move);
+
         // Destructor
         ~DMat();
 
@@ -71,6 +77,18 @@ namespace lia {
     using DMatf = DMat<float>;
     using DMati = DMat<int>;
 
+    // ================================= CAST =================================
+
+    /**
+     * Cast a matrix or vector to another type.
+     * @param result Matrix or vector of the destination type.
+     * @param value Matrix or vector of the source type.
+    */
+    template <typename TA, typename TB>
+    void cast(DVec<TB>& result, const DVec<TA>& value);
+    template <typename TA, typename TB>
+    void cast(DMat<TB>& result, const DMat<TA>& value);
+
     // ================================= CLEAR =================================
 
     /**
@@ -92,6 +110,8 @@ namespace lia {
     */
     template <typename T>
     void transpose(DMat<T>& result, const DVec<T>& value);
+    template <typename T>
+    void transpose(DVec<T>& result, const DMat<T>& value);
     template <typename T>
     void transpose(DMat<T>& result, const DMat<T>& value);
 

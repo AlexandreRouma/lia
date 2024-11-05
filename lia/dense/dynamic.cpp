@@ -1,5 +1,7 @@
 #include "dynamic.h"
+#include <type_traits>
 #include <string.h>
+#include <stdio.h>
 
 namespace lia {
     template <typename DT>
@@ -12,6 +14,24 @@ namespace lia {
     DMat<DT>::DMat(int lines, int columns) : ls(lines), cs(columns) {
         // Allocate the data buffer
         _data = new DT[ls*cs];
+    }
+
+    template <typename DT>
+    DMat<DT>::DMat(const DMat& copy) : ls(copy.ls), cs(copy.cs) {
+        // Allocate the data buffer
+        _data = new DT[ls*cs];
+
+        // Copy over the data
+        memcpy(_data, copy._data, ls*cs*sizeof(DT));
+    }
+
+    template <typename DT>
+    DMat<DT>::DMat(DMat&& move) : ls(move.ls), cs(move.cs) {
+        // Copy the data buffer pointer
+        _data = move._data;
+
+        // Prevent the moved object from deleting the buffer
+        move._data = NULL;
     }
 
     template <typename DT>
@@ -33,6 +53,38 @@ namespace lia {
     template class DVec<double>;
     template class DVec<float>;
     template class DVec<int>;
+
+    template <typename TA, typename TB>
+    void cast(DVec<TB>& result, const DVec<TA>& value) {
+        const TA* a = value.data();
+        TB* r = result.data();
+        const int d = value.ls;
+        for (int i = 0; i < d; i++) {
+            r[i] = (TB)a[i];
+        }
+    }
+    template void cast(DVec<float>& result, const DVec<double>& value);
+    template void cast(DVec<int>& result, const DVec<double>& value);
+    template void cast(DVec<double>& result, const DVec<float>& value);
+    template void cast(DVec<int>& result, const DVec<double>& value);
+    template void cast(DVec<double>& result, const DVec<int>& value);
+    template void cast(DVec<float>& result, const DVec<int>& value);
+
+    template <typename TA, typename TB>
+    void cast(DMat<TB>& result, const DMat<TA>& value) {
+        const TA* a = value.data();
+        TB* r = result.data();
+        const int d = value.ls * value.cs;
+        for (int i = 0; i < d; i++) {
+            r[i] = (TB)a[i];
+        }
+    }
+    template void cast(DMat<float>& result, const DMat<double>& value);
+    template void cast(DMat<int>& result, const DMat<double>& value);
+    template void cast(DMat<double>& result, const DMat<float>& value);
+    template void cast(DMat<int>& result, const DMat<double>& value);
+    template void cast(DMat<double>& result, const DMat<int>& value);
+    template void cast(DMat<float>& result, const DMat<int>& value);
 
     template <typename T>
     void clear(DVec<T>& result, T value) {
@@ -68,6 +120,14 @@ namespace lia {
     template void transpose<int>(DMat<int>& result, const DVec<int>& value);
 
     template <typename T>
+    void transpose(DVec<T>& result, const DMat<T>& value) {
+        memcpy(result.data(), value.data(), value.cs * sizeof(T));
+    }
+    template void transpose<double>(DVec<double>& result, const DMat<double>& value);
+    template void transpose<float>(DVec<float>& result, const DMat<float>& value);
+    template void transpose<int>(DVec<int>& result, const DMat<int>& value);
+
+    template <typename T>
     void transpose(DMat<T>& result, const DMat<T>& value) {
         const T* v = value.data();
         T* r = result.data();
@@ -88,7 +148,7 @@ namespace lia {
     T norm(const DVec<T>& value) {
         const T* v = value.data();
         const int ls = value.ls;
-        T sum = 0.0;
+        T sum = (T)0.0;
         for (int i = 0; i < ls; i++) {
             sum += v[i]*v[i];
         }
@@ -96,7 +156,7 @@ namespace lia {
             return sqrtf(sum);
         }
         else {
-            return sqrt(sum);
+            return (T)sqrt(sum);
         }
     }
     template double norm<double>(const DVec<double>& value);
@@ -175,7 +235,7 @@ namespace lia {
     template <typename T>
     void mul(DMat<T>& result, const DMat<T>& left, T right) {
         const T* m = left.data();
-        const int d = right.ls * right.cs;
+        const int d = left.ls * left.cs;
         T* r = result.data();
         for (int i = 0; i < d; i++) {
             r[i] = m[i] * right;
@@ -201,7 +261,7 @@ namespace lia {
     template <typename T>
     void div(DMat<T>& result, const DMat<T>& left, T right) {
         const T* m = left.data();
-        const int d = right.ls * right.cs;
+        const int d = left.ls * left.cs;
         T* r = result.data();
         for (int i = 0; i < d; i++) {
             r[i] = m[i] / right;
@@ -216,7 +276,7 @@ namespace lia {
         const T* a = left.data();
         const T* b = right.data();
         const int d = right.ls;
-        result = 0.0;
+        result = (T)0.0;
         for (int i = 0; i < d; i++) {
             result += a[i]*b[i];
         }
